@@ -1,0 +1,371 @@
+# Implementation Plan: Customer Support Ticket System
+
+## Overview
+
+This implementation plan breaks down the Customer Support Ticket System into discrete, manageable tasks. The system will be built incrementally, starting with the backend API and database, then the frontend components, and finally integration and testing. Each task builds on previous work to ensure continuous validation of functionality.
+
+## Tasks
+
+- [x] 1. Set up project structure and dependencies
+  - Create backend directory with Express, TypeScript, SQLite dependencies
+  - Create frontend directory with React, TypeScript, Vite, Tailwind CSS
+  - Configure TypeScript for both projects
+  - Set up ESLint and Prettier
+  - Create basic folder structure following architecture document
+  - _Requirements: All_
+
+- [x] 2. Initialize database and create schema
+  - [x] 2.1 Create database initialization module
+    - Write SQLite connection setup
+    - Create tables: tickets, comments, users
+    - Add indexes for performance
+    - _Requirements: All_
+  
+  - [ ]* 2.2 Write unit tests for database initialization
+    - Test table creation
+    - Test index creation
+    - _Requirements: All_
+
+- [x] 3. Implement ticket data models and validation
+  - [x] 3.1 Create TypeScript interfaces for Ticket, Comment, User models
+    - Define all type aliases (TicketStatus, TicketPriority, TicketCategory)
+    - Add JSDoc comments explaining each field
+    - _Requirements: 1.1, 1.6, 1.7_
+  
+  - [x] 3.2 Create validation functions for ticket inputs
+    - Validate title (non-empty, trimmed)
+    - Validate description (non-empty, trimmed)
+    - Validate category (must be valid enum value)
+    - Validate priority (must be valid enum value)
+    - Validate email format
+    - _Requirements: 1.2, 1.3, 1.6, 1.7_
+  
+  - [ ]* 3.3 Write property test for input validation
+    - **Property 2: Empty title rejection**
+    - **Property 3: Empty description rejection**
+    - **Property 4: Category validation**
+    - **Property 5: Priority validation**
+    - **Validates: Requirements 1.2, 1.3, 1.6, 1.7**
+
+- [x] 4. Implement ticket service layer
+  - [x] 4.1 Create ticket service with CRUD operations
+    - Implement createTicket function with ID generation and timestamps
+    - Implement getTickets function with filtering support
+    - Implement getTicketById function with comment loading
+    - Implement updateTicketStatus function with system comment creation
+    - _Requirements: 1.1, 1.4, 1.5, 2.1, 3.1, 4.1, 4.3, 8.1, 8.2, 8.3, 8.4, 8.5_
+  
+  - [ ]* 4.2 Write property test for ticket creation
+    - **Property 1: Valid ticket creation**
+    - **Property 6: Unique ticket IDs**
+    - **Validates: Requirements 1.1, 1.4, 1.5**
+  
+  - [ ]* 4.3 Write property test for status updates
+    - **Property 11: Status update success**
+    - **Property 12: Status validation**
+    - **Property 13: Non-existent ticket error**
+    - **Validates: Requirements 4.1, 4.2, 4.3, 4.4**
+  
+  - [ ]* 4.4 Write property test for filtering
+    - **Property 24: Combined filter accuracy**
+    - **Property 25: Filter reset completeness**
+    - **Validates: Requirements 8.1, 8.2, 8.3, 8.4, 8.5, 8.7**
+
+- [ ] 5. Checkpoint - Ensure ticket service tests pass
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [-] 6. Implement comment service layer
+  - [x] 6.1 Create comment service
+    - Implement addComment function with timestamp and author info
+    - Implement getCommentsByTicketId function with chronological ordering
+    - _Requirements: 3.2, 5.1, 5.3_
+  
+  - [ ]* 6.2 Write property test for comment creation
+    - **Property 14: Comment creation**
+    - **Property 15: Empty comment rejection**
+    - **Validates: Requirements 5.1, 5.2, 5.3**
+
+- [ ] 7. Implement authentication service
+  - [ ] 7.1 Create authentication service
+    - Implement user registration with password hashing (bcrypt)
+    - Implement login with credential verification
+    - Implement JWT token generation
+    - Implement token verification
+    - _Requirements: 7.1, 7.2, 7.4_
+  
+  - [ ]* 7.2 Write property test for authentication
+    - **Property 20: Valid authentication**
+    - **Property 21: Invalid authentication rejection**
+    - **Property 23: Logout token invalidation**
+    - **Validates: Requirements 7.1, 7.2, 7.4**
+
+- [ ] 8. Implement dashboard service
+  - [ ] 8.1 Create dashboard metrics calculation service
+    - Implement calculateMetrics function
+    - Count open tickets
+    - Group tickets by priority
+    - Group tickets by category
+    - Calculate average resolution time
+    - _Requirements: 6.1, 6.2, 6.3, 6.4_
+  
+  - [ ]* 8.2 Write property test for metrics calculation
+    - **Property 16: Open ticket count accuracy**
+    - **Property 17: Priority grouping accuracy**
+    - **Property 18: Category grouping accuracy**
+    - **Property 19: Average resolution time calculation**
+    - **Validates: Requirements 6.1, 6.2, 6.3, 6.4**
+
+- [ ] 9. Checkpoint - Ensure all service layer tests pass
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [ ] 10. Implement Express middleware
+  - [ ] 10.1 Create authentication middleware
+    - Implement JWT token verification
+    - Attach user info to request object
+    - Handle missing/invalid tokens
+    - _Requirements: 7.3_
+  
+  - [ ] 10.2 Create error handling middleware
+    - Handle ValidationError (400)
+    - Handle NotFoundError (404)
+    - Handle UnauthorizedError (401)
+    - Handle generic errors (500)
+    - _Requirements: All_
+  
+  - [ ]* 10.3 Write property test for authorization
+    - **Property 22: Protected resource authorization**
+    - **Validates: Requirements 7.3**
+
+- [ ] 11. Implement API routes and controllers
+  - [ ] 11.1 Create authentication routes
+    - POST /api/auth/login
+    - POST /api/auth/logout
+    - _Requirements: 7.1, 7.4_
+  
+  - [ ] 11.2 Create ticket routes
+    - GET /api/tickets (with query params for filters)
+    - GET /api/tickets/:id
+    - POST /api/tickets
+    - PATCH /api/tickets/:id/status
+    - POST /api/tickets/:id/comments
+    - _Requirements: 1.1, 2.1, 3.1, 4.1, 5.1, 8.1, 8.2, 8.3, 8.4, 8.5_
+  
+  - [ ] 11.3 Create dashboard routes
+    - GET /api/dashboard/metrics
+    - _Requirements: 6.1, 6.2, 6.3, 6.4_
+  
+  - [ ]* 11.4 Write integration tests for API endpoints
+    - Test all endpoints with valid and invalid inputs
+    - Test authentication flow
+    - Test error responses
+    - _Requirements: All_
+
+- [ ] 12. Checkpoint - Ensure backend API is functional
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [x] 13. Set up React frontend structure
+  - [x] 13.1 Create React app with Vite
+    - Configure Vite for TypeScript
+    - Set up Tailwind CSS
+    - Create component folder structure
+    - Set up React Router
+    - _Requirements: All_
+  
+  - [x] 13.2 Create API client module
+    - Implement fetch wrapper with error handling
+    - Add authentication token management
+    - Create typed API functions for all endpoints
+    - _Requirements: All_
+
+- [x] 14. Implement authentication components
+  - [x] 14.1 Create AuthContext for global auth state
+    - Manage user session
+    - Store JWT token in localStorage
+    - Provide login/logout functions
+    - _Requirements: 7.1, 7.4_
+  
+  - [x] 14.2 Create LoginForm component
+    - Email and password inputs
+    - Form validation
+    - Error message display
+    - Submit handler calling API
+    - _Requirements: 7.1, 7.2_
+  
+  - [x] 14.3 Create ProtectedRoute component
+    - Check authentication status
+    - Redirect to login if not authenticated
+    - _Requirements: 7.3_
+
+- [x] 15. Implement shared UI components
+  - [x] 15.1 Create badge components
+    - StatusBadge with color coding
+    - PriorityBadge with color coding
+    - CategoryBadge with color coding
+    - _Requirements: 2.2_
+  
+  - [x] 15.2 Create utility components
+    - LoadingSpinner
+    - ErrorMessage
+    - EmptyState
+    - _Requirements: 2.4, 3.3, 8.6_
+
+- [x] 16. Implement ticket list components
+  - [x] 16.1 Create TicketCard component
+    - Display title, status, priority, category, date
+    - Click handler for navigation
+    - _Requirements: 2.1, 2.2_
+  
+  - [x] 16.2 Create FilterBar component
+    - Status filter dropdown (multi-select)
+    - Priority filter dropdown (multi-select)
+    - Category filter dropdown (multi-select)
+    - Date range picker
+    - Clear filters button
+    - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.7_
+  
+  - [x] 16.3 Create TicketList component
+    - Fetch tickets with useEffect
+    - Apply filters
+    - Sort by date (newest first)
+    - Display TicketCard for each ticket
+    - Handle empty state
+    - _Requirements: 2.1, 2.3, 2.4, 8.5_
+  
+  - [ ]* 16.4 Write property test for ticket list display
+    - **Property 7: Ticket list completeness**
+    - **Property 8: Ticket list ordering**
+    - **Validates: Requirements 2.1, 2.2, 2.3**
+
+- [x] 17. Implement ticket detail components
+  - [x] 17.1 Create TicketHeader component (integrated in TicketDetail)
+    - Display title and metadata
+    - Show all badges (status, priority, category)
+    - Display ticket ID
+    - _Requirements: 3.1, 3.4_
+  
+  - [x] 17.2 Create StatusSelector component (integrated in TicketDetail)
+    - Dropdown with all status options
+    - Update handler calling API
+    - Optimistic UI update
+    - _Requirements: 4.1, 4.2_
+  
+  - [x] 17.3 Create CommentCard component
+    - Display comment content
+    - Show author name and timestamp
+    - Visual distinction for system comments
+    - _Requirements: 3.2, 5.4_
+  
+  - [x] 17.4 Create CommentForm component
+    - Textarea for comment input
+    - Submit button
+    - Validation for empty comments
+    - _Requirements: 5.1, 5.2_
+  
+  - [x] 17.5 Create CommentThread component
+    - Display comments in chronological order
+    - Handle empty state
+    - Include CommentForm at bottom
+    - _Requirements: 3.2, 3.3, 5.3_
+  
+  - [x] 17.6 Create TicketDetail component
+    - Fetch ticket by ID with useEffect
+    - Compose all sub-components
+    - Handle loading and error states
+    - _Requirements: 3.1, 3.2, 3.4_
+  
+  - [ ]* 17.7 Write property test for ticket detail display
+    - **Property 9: Ticket detail completeness**
+    - **Property 10: Comment display ordering**
+    - **Validates: Requirements 3.1, 3.2, 3.4, 5.4**
+
+- [x] 18. Implement ticket creation components
+  - [x] 18.1 Create TicketForm component
+    - Input fields for title, description, category, priority, customer info
+    - Client-side validation
+    - Submit handler calling API
+    - Success/error message display
+    - Navigation to ticket detail on success
+    - _Requirements: 1.1, 1.2, 1.3, 1.6, 1.7_
+  
+  - [ ]* 18.2 Write property test for form validation
+    - Test validation for all input fields
+    - **Validates: Requirements 1.2, 1.3, 1.6, 1.7**
+
+- [x] 19. Implement dashboard components
+  - [x] 19.1 Create MetricCard component
+    - Display label and value
+    - Support different sizes and colors
+    - _Requirements: 6.1, 6.2, 6.3, 6.4_
+  
+  - [x] 19.2 Create Dashboard component
+    - Fetch metrics with useEffect
+    - Display total open tickets
+    - Display tickets by priority (4 cards)
+    - Display tickets by category (3 cards)
+    - Display average resolution time
+    - Handle loading and error states
+    - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
+
+- [x] 20. Checkpoint - Ensure frontend components render correctly
+  - All components created and TypeScript diagnostics pass
+
+- [x] 21. Implement routing and navigation
+  - [x] 21.1 Set up React Router
+    - Define routes: /, /login, /tickets, /tickets/:id, /tickets/new, /dashboard
+    - Implement navigation between pages
+    - Add protected routes for authenticated pages
+    - _Requirements: All_
+  
+  - [x] 21.2 Create App component
+    - Set up AuthContext provider
+    - Configure router
+    - Add navigation menu
+    - _Requirements: All_
+
+- [ ] 22. Add styling and polish
+  - [ ] 22.1 Apply Tailwind CSS styling
+    - Style all components for consistent look
+    - Add responsive design for mobile
+    - Implement color scheme for status/priority badges
+    - Add hover effects and transitions
+    - _Requirements: All_
+  
+  - [ ] 22.2 Add loading states and animations
+    - Loading spinners for async operations
+    - Skeleton screens for data loading
+    - Smooth transitions between states
+    - _Requirements: All_
+
+- [ ] 23. Create seed data for demo
+  - [ ] 23.1 Write seed script
+    - Create sample users (support agents)
+    - Create sample tickets with various statuses, priorities, categories
+    - Create sample comments on tickets
+    - _Requirements: All_
+  
+  - [ ] 23.2 Add demo data reset functionality
+    - Script to reset database to initial demo state
+    - _Requirements: All_
+
+- [ ] 24. Integration and end-to-end testing
+  - [ ]* 24.1 Write end-to-end tests
+    - Test complete user flows (login, create ticket, update status, add comment)
+    - Test filtering and search
+    - Test dashboard metrics
+    - _Requirements: All_
+
+- [ ] 25. Final checkpoint - Complete system validation
+  - Run all tests (unit, property, integration, e2e)
+  - Verify all requirements are met
+  - Test in demo scenario
+  - Ensure all tests pass, ask the user if questions arise.
+
+## Notes
+
+- Tasks marked with `*` are optional and can be skipped for faster MVP
+- Each task references specific requirements for traceability
+- Checkpoints ensure incremental validation
+- Property tests validate universal correctness properties
+- Unit tests validate specific examples and edge cases
+- The implementation follows the architecture defined in the design document
+- All code should include comments following the code-comments-guide steering document
