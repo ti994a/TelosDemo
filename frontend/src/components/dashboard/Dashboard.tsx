@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDashboard } from '../../hooks/useDashboard';
 import { MetricCard } from './MetricCard';
+import { DoughnutChart } from './DoughnutChart';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
 import { ErrorMessage } from '../shared/ErrorMessage';
 import { formatResolutionTime } from '../../utils/formatters';
@@ -70,53 +71,29 @@ export function Dashboard() {
           </div>
         </div>
 
-        {/* Tickets by priority */}
+        {/* Tickets by priority - Doughnut Chart */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Tickets by Priority</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <MetricCard
-              label="Critical Priority"
-              value={metrics.byPriority.Critical || 0}
-              color="red"
-            />
-            <MetricCard
-              label="High Priority"
-              value={metrics.byPriority.High || 0}
-              color="yellow"
-            />
-            <MetricCard
-              label="Medium Priority"
-              value={metrics.byPriority.Medium || 0}
-              color="blue"
-            />
-            <MetricCard
-              label="Low Priority"
-              value={metrics.byPriority.Low || 0}
-              color="gray"
-            />
-          </div>
+          <DoughnutChart
+            title="Tickets by Priority"
+            data={[
+              { label: 'Critical', value: metrics.byPriority.Critical || 0, color: '#ef4444' },
+              { label: 'High', value: metrics.byPriority.High || 0, color: '#f59e0b' },
+              { label: 'Medium', value: metrics.byPriority.Medium || 0, color: '#3b82f6' },
+              { label: 'Low', value: metrics.byPriority.Low || 0, color: '#9ca3af' },
+            ]}
+          />
         </div>
 
-        {/* Tickets by category */}
+        {/* Tickets by category - Doughnut Chart */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Tickets by Category</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <MetricCard
-              label="Technical Issues"
-              value={metrics.byCategory.Technical || 0}
-              color="purple"
-            />
-            <MetricCard
-              label="Billing Issues"
-              value={metrics.byCategory.Billing || 0}
-              color="green"
-            />
-            <MetricCard
-              label="General Inquiries"
-              value={metrics.byCategory.General || 0}
-              color="blue"
-            />
-          </div>
+          <DoughnutChart
+            title="Tickets by Category"
+            data={[
+              { label: 'Technical', value: metrics.byCategory.Technical || 0, color: '#8b5cf6' },
+              { label: 'Billing', value: metrics.byCategory.Billing || 0, color: '#10b981' },
+              { label: 'General', value: metrics.byCategory.General || 0, color: '#3b82f6' },
+            ]}
+          />
         </div>
       </div>
     </div>

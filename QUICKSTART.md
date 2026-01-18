@@ -63,18 +63,27 @@ Use these demo credentials:
 2. Show metrics:
    - Total open tickets
    - Average resolution time
-   - Tickets by priority (Critical, High, Medium, Low)
-   - Tickets by category (Technical, Billing, General)
+3. **NEW:** Show doughnut charts:
+   - Tickets by Priority chart (visual breakdown with color coding)
+   - Tickets by Category chart (visual breakdown with color coding)
+   - Point out the total count in the center of each chart
+   - Highlight the interactive legend showing counts
 
 ### Part 2: Ticket List & Filtering (10 min)
 1. Click "Tickets" in the navigation
-2. Show the ticket list with status badges
-3. Demonstrate filtering:
+2. **NEW:** Demonstrate view toggle:
+   - Show default grid view (cards)
+   - Click list icon to switch to list view (table format)
+   - Click grid icon to switch back
+   - Explain: Grid view for visual browsing, List view for quick scanning
+3. Show the ticket list with status badges
+4. Demonstrate filtering:
    - Filter by Status (Open, In Progress, Resolved, Closed)
    - Filter by Priority (Critical, High, Medium, Low)
    - Filter by Category (Technical, Billing, General)
    - Filter by Date Range
-4. Show "Clear Filters" functionality
+5. Show "Clear Filters" functionality
+6. **NEW:** Show that filters work in both grid and list views
 
 ### Part 3: Ticket Details (10 min)
 1. Click on any ticket to view details
@@ -170,6 +179,8 @@ Then refresh the browser and login again.
 8. **Form Validation**: Client-side validation with helpful error messages
 9. **Authentication**: Secure JWT-based authentication
 10. **Responsive Design**: Works on desktop and mobile devices
+11. **NEW: Visual Data Representation**: Doughnut charts for priority and category breakdowns
+12. **NEW: Flexible Views**: Toggle between grid and list views for tickets
 
 ## Next Steps After Demo
 
