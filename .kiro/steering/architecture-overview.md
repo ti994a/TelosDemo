@@ -59,11 +59,12 @@ graph TD
     
     Auth --> LoginForm[Login Form]
     
-    Dashboard --> MetricCard[Metric Cards]
-    Dashboard --> Charts[Charts]
+    Dashboard --> DoughnutChart[Doughnut Charts]
     
     TicketList --> FilterBar[Filter Bar]
-    TicketList --> TicketCard[Ticket Card]
+    TicketList --> ViewToggle[View Toggle]
+    TicketList --> TicketCard[Ticket Card - Grid View]
+    TicketList --> TicketListItem[Ticket List Item - List View]
     
     TicketDetail --> TicketHeader[Ticket Header]
     TicketDetail --> TicketInfo[Ticket Info]
@@ -137,19 +138,20 @@ sequenceDiagram
 
 ```
 Authentication
-├── POST   /api/auth/login          # Agent login
-└── POST   /api/auth/logout         # Agent logout
+├── POST   /api/auth/register        # Register new agent (dev only)
+├── POST   /api/auth/login           # Agent login
+├── POST   /api/auth/logout          # Agent logout
+└── GET    /api/auth/me              # Get current user
 
 Tickets
-├── GET    /api/tickets             # Get all tickets (with filters)
-├── GET    /api/tickets/:id         # Get single ticket
-├── POST   /api/tickets             # Create new ticket
-├── PATCH  /api/tickets/:id         # Update ticket
-├── PATCH  /api/tickets/:id/status  # Update ticket status
+├── GET    /api/tickets              # Get all tickets (with filters)
+├── GET    /api/tickets/:id          # Get single ticket
+├── POST   /api/tickets              # Create new ticket
+├── PATCH  /api/tickets/:id/status   # Update ticket status
 └── POST   /api/tickets/:id/comments # Add comment
 
 Dashboard
-└── GET    /api/dashboard/metrics   # Get dashboard metrics
+└── GET    /api/dashboard/metrics    # Get dashboard metrics
 ```
 
 ## Database Schema
@@ -170,6 +172,7 @@ erDiagram
         string customer_name
         datetime created_at
         datetime updated_at
+        datetime resolved_at
     }
     
     COMMENTS {

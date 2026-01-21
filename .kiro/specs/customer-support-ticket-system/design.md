@@ -54,12 +54,14 @@ All communication between frontend and backend uses JSON over HTTP. The frontend
 
 3. **Dashboard Components**
    - `Dashboard`: Main dashboard view showing metrics
-   - `MetricCard`: Reusable card component for displaying individual metrics
-   - Displays: total open tickets, tickets by priority, tickets by category, average resolution time
+   - `MetricCard`: Reusable card component for displaying individual metrics (deprecated in favor of charts)
+   - `DoughnutChart`: Canvas-based doughnut chart for visual data representation
+   - Displays: total open tickets, tickets by priority (doughnut chart), tickets by category (doughnut chart), average resolution time
 
 4. **Ticket List Components**
-   - `TicketList`: Main list view with filtering capabilities
-   - `TicketCard`: Individual ticket card showing summary information
+   - `TicketList`: Main list view with filtering capabilities and view toggle (grid/list)
+   - `TicketCard`: Individual ticket card showing summary information (grid view)
+   - `TicketListItem`: Individual ticket row showing summary information (list view)
    - `FilterBar`: Filter controls for status, priority, category, and date range
 
 5. **Ticket Detail Components**
@@ -80,6 +82,53 @@ All communication between frontend and backend uses JSON over HTTP. The frontend
 - `StatusBadge`: Visual indicator for ticket status
 - `PriorityBadge`: Visual indicator for ticket priority
 - `CategoryBadge`: Visual indicator for ticket category
+
+### UI Enhancements
+
+#### Dashboard Visualizations
+
+The dashboard uses HTML5 Canvas API to render interactive doughnut charts:
+
+1. **DoughnutChart Component**
+   - Renders data as circular chart with hollow center
+   - Displays total count in center
+   - Interactive legend showing individual values
+   - Color-coded segments for easy identification
+   - Empty state handling when no data exists
+
+2. **Priority Breakdown Chart**
+   - Critical: Red (#ef4444)
+   - High: Orange (#f59e0b)
+   - Medium: Blue (#3b82f6)
+   - Low: Gray (#6b7280)
+
+3. **Category Breakdown Chart**
+   - Technical: Purple (#8b5cf6)
+   - Billing: Green (#10b981)
+   - General: Blue (#3b82f6)
+
+#### Ticket List View Options
+
+The ticket list supports two view modes:
+
+1. **Grid View (Default)**
+   - Card-based layout using `TicketCard` component
+   - Shows ticket title, badges, customer info, and date
+   - Responsive grid that adapts to screen size
+   - Hover effects for better interactivity
+
+2. **List View**
+   - Table-based layout using `TicketListItem` component
+   - Horizontal row format with aligned columns
+   - Shows: title, ID, status, priority, category, customer, date
+   - More compact for viewing many tickets at once
+   - Better for scanning and comparing tickets
+
+3. **View Toggle**
+   - Icon buttons in top-right corner of ticket list
+   - Grid icon (squares) for card view
+   - List icon (lines) for table view
+   - Persists user preference during session
 
 ### Backend Components
 
@@ -126,6 +175,54 @@ Services contain business logic:
 ### API Interfaces
 
 #### Request/Response Formats
+
+**Register Agent Request (Development Only):**
+```typescript
+POST /api/auth/register
+{
+  "email": "agent@example.com",
+  "password": "password123",
+  "name": "Agent Name"
+}
+```
+
+**Register Agent Response:**
+```typescript
+{
+  "success": true,
+  "data": {
+    "id": "user-uuid",
+    "email": "agent@example.com",
+    "name": "Agent Name",
+    "createdAt": "2024-01-15T10:00:00.000Z"
+  },
+  "message": "User registered successfully"
+}
+```
+
+**Login Request:**
+```typescript
+POST /api/auth/login
+{
+  "email": "agent@example.com",
+  "password": "password123"
+}
+```
+
+**Login Response:**
+```typescript
+{
+  "success": true,
+  "data": {
+    "token": "jwt-token-string",
+    "user": {
+      "id": "user-uuid",
+      "email": "agent@example.com",
+      "name": "Agent Name"
+    }
+  }
+}
+```
 
 **Create Ticket Request:**
 ```typescript
@@ -278,6 +375,16 @@ interface DashboardMetrics {
   byPriority: Record<TicketPriority, number>;  // Ticket counts by priority
   byCategory: Record<TicketCategory, number>;  // Ticket counts by category
   averageResolutionTime: number;               // Average time in hours
+}
+```
+
+### Doughnut Chart Data Model
+
+```typescript
+interface DoughnutChartData {
+  label: string;   // Display label for the segment
+  value: number;   // Numeric value for the segment
+  color: string;   // Hex color code for the segment
 }
 ```
 
@@ -581,3 +688,262 @@ test('creating ticket with valid input produces ticket with Open status', () => 
 - **React Testing Library**: Component testing
 - **Supertest**: API endpoint testing
 - **MSW (Mock Service Worker)**: API mocking for frontend tests
+
+
+## Security Implementation
+
+This section documents how the Customer Support Ticket System implements NIST SP 800-53 security controls, demonstrating security best practices for organizations serving government and regulated industries.
+
+### Authentication and Authorization (NIST AC-2, AC-3)
+
+**Current Implementation:**
+
+1. **Account Management (AC-2)**
+   - User accounts stored in `users` table with unique email constraint
+   - Password hashing using bcrypt with work factor 10 (configurable)
+   - Account creation via `/api/auth/register` endpoint (development only)
+   - No account lockout mechanism (recommended for production)
+   - No password complexity requirements (recommended for production)
+
+2. **Access Enforcement (AC-3)**
+   - JWT-based authentication implemented in `backend/src/middleware/auth.ts`
+   - Protected routes require valid JWT token in Authorization header
+   - Token includes user claims: id, email, name
+   - Token expiration set to 8 hours (configurable via JWT_EXPIRES_IN)
+   - Frontend stores token in localStorage and includes in API requests
+   - AuthContext provides authentication state throughout React app
+
+**Implementation Files:**
+- `backend/src/services/authService.ts` - Authentication logic, JWT generation
+- `backend/src/middleware/auth.ts` - JWT verification middleware
+- `backend/src/controllers/authController.ts` - Login/logout handlers
+- `frontend/src/context/AuthContext.tsx` - Frontend authentication state
+- `frontend/src/api/client.ts` - Automatic token inclusion in requests
+
+**Compliance Status:** ✅ Implemented
+- AC-2: User accounts managed, passwords hashed with bcrypt
+- AC-3: JWT tokens enforce authorization on protected endpoints
+
+**Production Recommendations:**
+- Implement account lockout after N failed login attempts
+- Add password complexity requirements (length, character types)
+- Implement password expiration and rotation policies
+- Add multi-factor authentication (MFA) support
+- Implement role-based access control (RBAC) for different user types
+
+### Data Encryption (NIST SC-12, SC-13)
+
+**Current Implementation:**
+
+1. **Cryptographic Key Management (SC-12)**
+   - JWT secret key stored in environment variable `JWT_SECRET`
+   - Default secret provided for demo purposes (must be changed for production)
+   - Bcrypt salt automatically generated per password (built-in to bcrypt)
+   - No key rotation mechanism (recommended for production)
+
+2. **Cryptographic Protection (SC-13)**
+   - Passwords hashed using bcrypt with salt (10 rounds)
+   - JWT tokens signed using HS256 algorithm
+   - HTTPS/TLS encryption expected in production deployment
+   - Environment variables used for sensitive configuration
+   - No encryption at rest for database (SQLite file unencrypted)
+
+**Implementation Files:**
+- `backend/src/services/authService.ts` - Password hashing with bcrypt
+- `backend/src/utils/jwt.ts` - JWT token generation and verification
+- `backend/.env.example` - Environment variable template
+- `backend/src/app.ts` - Security middleware configuration (helmet)
+
+**Compliance Status:** ⚠️ Partially Implemented
+- SC-12: JWT secret configurable, bcrypt salt automatic
+- SC-13: Passwords hashed, JWT signed, but no TLS enforcement in code
+
+**Production Recommendations:**
+- Enforce HTTPS/TLS 1.2+ at reverse proxy or load balancer level
+- Implement database encryption at rest (SQLCipher or encrypted filesystem)
+- Use stronger JWT secret (minimum 256 bits, cryptographically random)
+- Implement key rotation for JWT secrets
+- Add Content Security Policy (CSP) headers
+- Enable HSTS (HTTP Strict Transport Security)
+
+### Audit Logging (NIST AU-2, AU-3)
+
+**Current Implementation:**
+
+1. **Event Logging (AU-2)**
+   - HTTP request logging via Morgan middleware (development mode)
+   - Authentication attempts logged to console
+   - Ticket status changes recorded as system comments in database
+   - No structured audit log table or file
+   - No log retention policy
+
+2. **Audit Record Content (AU-3)**
+   - System comments include: timestamp, agent ID, status change
+   - HTTP logs include: method, path, status code, response time
+   - Authentication logs include: email, success/failure
+   - Missing: source IP, session ID, detailed event types
+
+**Implementation Files:**
+- `backend/src/app.ts` - Morgan HTTP logging middleware
+- `backend/src/services/authService.ts` - Authentication logging
+- `backend/src/services/ticketService.ts` - Status change system comments
+- `backend/src/database/db.ts` - Database query logging (development)
+
+**Compliance Status:** ⚠️ Partially Implemented
+- AU-2: Basic logging present but not comprehensive
+- AU-3: Some audit information captured but incomplete
+
+**Production Recommendations:**
+- Create dedicated `audit_logs` table with structured schema
+- Log all security-relevant events: authentication, authorization failures, data access, modifications
+- Include in audit records: timestamp, event type, user ID, source IP, session ID, outcome, affected resources
+- Implement log rotation and retention policies
+- Send logs to centralized logging system (e.g., ELK stack, Splunk)
+- Protect audit logs from unauthorized modification
+- Implement log monitoring and alerting for suspicious activities
+
+### Input Validation (NIST SI-10)
+
+**Current Implementation:**
+
+1. **Information Input Validation (SI-10)**
+   - Title and description validated for non-empty content
+   - Email format validation using regex pattern
+   - Enumerated values (status, priority, category) validated against allowed sets
+   - Request body structure validated in controllers
+   - SQL injection prevented via parameterized queries (sqlite library)
+   - XSS prevention via React's automatic escaping
+   - No explicit input sanitization library
+
+**Implementation Files:**
+- `backend/src/controllers/ticketController.ts` - Input validation in controllers
+- `backend/src/services/ticketService.ts` - Business logic validation
+- `backend/src/utils/validators.ts` - Validation helper functions
+- `backend/src/database/db.ts` - Parameterized SQL queries
+- Frontend components - React automatic XSS prevention
+
+**Compliance Status:** ✅ Implemented
+- SI-10: Input validation present at multiple layers
+
+**Production Recommendations:**
+- Add explicit input sanitization library (e.g., DOMPurify for HTML, validator.js)
+- Implement request rate limiting to prevent abuse
+- Add input length limits for all text fields
+- Validate file uploads if file attachment feature added
+- Implement CSRF protection for state-changing operations
+- Add request size limits to prevent DoS attacks
+- Validate and sanitize data from external sources
+
+### Session Management (NIST AC-12)
+
+**Current Implementation:**
+
+1. **Session Termination (AC-12)**
+   - JWT tokens have 8-hour expiration (configurable)
+   - Expired tokens rejected by authentication middleware
+   - Logout clears token from localStorage (client-side only)
+   - No server-side token revocation mechanism
+   - No token refresh mechanism
+   - No idle timeout (token valid until expiration regardless of activity)
+
+**Implementation Files:**
+- `backend/src/middleware/auth.ts` - Token expiration validation
+- `backend/src/services/authService.ts` - Token generation with expiration
+- `frontend/src/context/AuthContext.tsx` - Logout token clearing
+- `frontend/src/api/client.ts` - Token expiration handling
+
+**Compliance Status:** ⚠️ Partially Implemented
+- AC-12: Token expiration implemented but no server-side revocation
+
+**Production Recommendations:**
+- Implement token revocation list (blacklist) or use short-lived tokens with refresh tokens
+- Add idle timeout detection (track last activity, invalidate after N minutes)
+- Implement token refresh mechanism for better user experience
+- Store active sessions in database or Redis for server-side management
+- Implement concurrent session limits per user
+- Add "logout all devices" functionality
+- Implement secure session ID generation and management
+- Add session activity logging
+
+### Security Middleware and Headers
+
+**Current Implementation:**
+
+The application uses several security middleware packages:
+
+1. **Helmet.js** - Sets security-related HTTP headers
+   - X-DNS-Prefetch-Control
+   - X-Frame-Options (prevents clickjacking)
+   - X-Content-Type-Options (prevents MIME sniffing)
+   - X-XSS-Protection
+   - Referrer-Policy
+   - Content-Security-Policy (default policy)
+
+2. **CORS** - Cross-Origin Resource Sharing configuration
+   - Configured to allow frontend origin (http://localhost:5173)
+   - Credentials enabled for cookie/auth header support
+   - Should be restricted to production domain in deployment
+
+3. **Express JSON Parser** - Request body parsing
+   - Automatic JSON parsing with size limits
+   - Prevents large payload attacks
+
+**Implementation Files:**
+- `backend/src/app.ts` - Security middleware configuration
+
+**Compliance Status:** ✅ Implemented
+- Basic security headers configured
+- CORS properly configured for development
+
+**Production Recommendations:**
+- Customize Content-Security-Policy for application needs
+- Add rate limiting middleware (e.g., express-rate-limit)
+- Implement request validation middleware
+- Add compression middleware for performance
+- Configure CORS for production domain only
+- Add security.txt file for vulnerability disclosure
+
+### Security Testing
+
+**Recommended Security Tests:**
+
+1. **Authentication Tests**
+   - Test password hashing (verify bcrypt used)
+   - Test JWT token generation and validation
+   - Test expired token rejection
+   - Test invalid token rejection
+   - Test missing token rejection
+
+2. **Authorization Tests**
+   - Test protected endpoint access without token
+   - Test protected endpoint access with valid token
+   - Test token tampering detection
+
+3. **Input Validation Tests**
+   - Test SQL injection attempts (should be prevented)
+   - Test XSS attempts (should be escaped)
+   - Test invalid enum values (should be rejected)
+   - Test empty/whitespace inputs (should be rejected)
+   - Test oversized inputs (should be rejected)
+
+4. **Session Management Tests**
+   - Test token expiration
+   - Test logout token clearing
+   - Test concurrent session handling
+
+### Security Compliance Summary
+
+| NIST Control | Requirement | Implementation Status | Production Ready |
+|--------------|-------------|----------------------|------------------|
+| AC-2 | Account Management | ✅ Implemented | ⚠️ Needs enhancements |
+| AC-3 | Access Enforcement | ✅ Implemented | ✅ Yes |
+| SC-12 | Cryptographic Key Management | ⚠️ Partial | ❌ Needs key rotation |
+| SC-13 | Cryptographic Protection | ⚠️ Partial | ❌ Needs TLS enforcement |
+| AU-2 | Event Logging | ⚠️ Partial | ❌ Needs structured logging |
+| AU-3 | Audit Record Content | ⚠️ Partial | ❌ Needs complete audit data |
+| SI-10 | Input Validation | ✅ Implemented | ⚠️ Needs sanitization library |
+| AC-12 | Session Termination | ⚠️ Partial | ❌ Needs server-side revocation |
+
+**Overall Security Posture:**
+- **Demo Environment:** ✅ Adequate - Basic security controls in place
+- **Production Environment:** ⚠️ Requires enhancements - See recommendations above

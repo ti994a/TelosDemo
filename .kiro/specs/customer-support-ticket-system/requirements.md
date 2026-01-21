@@ -4,6 +4,10 @@
 
 The Customer Support Ticket System is a web-based application that enables customers to submit support requests and allows support agents to manage, track, and resolve those requests efficiently. The system provides ticket management capabilities, status tracking, commenting functionality, and analytics to help support teams deliver effective customer service.
 
+**Developed for Telos Corporation Demo**
+
+This application serves as a demonstration for Telos Corporation, a publicly traded (NASDAQ: TLS) information technology and cybersecurity company headquartered in Ashburn, Virginia. As a trusted provider of security solutions, Telos serves the Department of Defense, intelligence community, state and local governments, and highly regulated commercial organizations throughout the United States. This system demonstrates security best practices aligned with NIST standards.
+
 ## Glossary
 
 - **Ticket**: A support request submitted by a customer containing a problem description and relevant details
@@ -112,3 +116,92 @@ The Customer Support Ticket System is a web-based application that enables custo
 5. WHEN multiple filters are applied, THEN THE Ticket_System SHALL display only tickets matching all filter criteria
 6. WHEN no tickets match the filter criteria, THEN THE Ticket_System SHALL display an appropriate empty state message
 7. WHEN a support agent clears all filters, THEN THE Ticket_System SHALL display all tickets
+
+## Security Requirements
+
+The following security requirements align with NIST SP 800-53 controls to demonstrate security best practices for organizations serving government and regulated industries.
+
+### Requirement 9: Authentication and Authorization (NIST AC-2, AC-3)
+
+**User Story:** As a system administrator, I want robust authentication and authorization controls, so that only authorized users can access the system and perform actions appropriate to their role.
+
+**NIST Controls:**
+- **AC-2 (Account Management)**: Manage system accounts including creation, enabling, modification, review, and removal
+- **AC-3 (Access Enforcement)**: Enforce approved authorizations for logical access to information and system resources
+
+#### Acceptance Criteria
+
+1. WHEN a user attempts to access protected resources without authentication, THEN THE Ticket_System SHALL deny access and redirect to the login page
+2. WHEN a support agent provides valid credentials, THEN THE Ticket_System SHALL issue a time-limited JWT token with appropriate claims
+3. WHEN a JWT token expires, THEN THE Ticket_System SHALL require re-authentication before allowing further access
+4. WHEN a user provides invalid credentials, THEN THE Ticket_System SHALL reject the authentication attempt and log the failure
+5. WHEN storing user passwords, THEN THE Ticket_System SHALL use bcrypt hashing with appropriate work factor (minimum 10 rounds)
+6. WHEN a support agent logs out, THEN THE Ticket_System SHALL invalidate the session and clear authentication tokens
+7. WHEN an API request includes an invalid or expired JWT token, THEN THE Ticket_System SHALL return HTTP 401 Unauthorized
+
+### Requirement 10: Data Encryption (NIST SC-12, SC-13)
+
+**User Story:** As a security officer, I want sensitive data encrypted in transit and at rest, so that unauthorized parties cannot access confidential information.
+
+**NIST Controls:**
+- **SC-12 (Cryptographic Key Establishment and Management)**: Establish and manage cryptographic keys for required cryptography
+- **SC-13 (Cryptographic Protection)**: Implement cryptographic mechanisms to protect information confidentiality and integrity
+
+#### Acceptance Criteria
+
+1. WHEN data is transmitted between client and server, THEN THE Ticket_System SHALL use HTTPS/TLS encryption (TLS 1.2 or higher)
+2. WHEN storing user passwords, THEN THE Ticket_System SHALL use bcrypt with salt to prevent rainbow table attacks
+3. WHEN generating JWT tokens, THEN THE Ticket_System SHALL use a strong secret key (minimum 256 bits) stored securely
+4. WHEN storing sensitive configuration data, THEN THE Ticket_System SHALL use environment variables rather than hardcoded values
+5. WHEN displaying sensitive information in logs, THEN THE Ticket_System SHALL mask or redact passwords, tokens, and PII
+
+### Requirement 11: Audit Logging (NIST AU-2, AU-3)
+
+**User Story:** As a security officer, I want comprehensive audit logs of security-relevant events, so that I can detect, investigate, and respond to security incidents.
+
+**NIST Controls:**
+- **AU-2 (Event Logging)**: Identify the types of events that the system is capable of logging
+- **AU-3 (Content of Audit Records)**: Ensure audit records contain information that establishes what events occurred, when, where, the source, and the outcome
+
+#### Acceptance Criteria
+
+1. WHEN a user attempts authentication, THEN THE Ticket_System SHALL log the attempt with timestamp, username, source IP, and outcome (success/failure)
+2. WHEN a support agent modifies a ticket, THEN THE Ticket_System SHALL create an audit record with agent identifier, timestamp, and changes made
+3. WHEN a ticket status changes, THEN THE Ticket_System SHALL create a system comment recording the change with timestamp and agent identifier
+4. WHEN security-relevant events occur (failed authentication, authorization failures), THEN THE Ticket_System SHALL log the event with sufficient detail for investigation
+5. WHEN audit logs are created, THEN THE Ticket_System SHALL include: timestamp, event type, user identifier, source IP (if applicable), and outcome
+6. WHEN displaying audit information, THEN THE Ticket_System SHALL protect sensitive data from unauthorized disclosure
+
+### Requirement 12: Input Validation (NIST SI-10)
+
+**User Story:** As a security officer, I want all user inputs validated and sanitized, so that the system is protected from injection attacks and malformed data.
+
+**NIST Controls:**
+- **SI-10 (Information Input Validation)**: Check the validity of information inputs to the system
+
+#### Acceptance Criteria
+
+1. WHEN a user submits a ticket, THEN THE Ticket_System SHALL validate that title and description contain only allowed characters and are within length limits
+2. WHEN a user provides email input, THEN THE Ticket_System SHALL validate the email format before processing
+3. WHEN a user selects enumerated values (status, priority, category), THEN THE Ticket_System SHALL verify the value is in the allowed set
+4. WHEN processing API requests, THEN THE Ticket_System SHALL validate request body structure and data types before processing
+5. WHEN user input is displayed in the UI, THEN THE Ticket_System SHALL sanitize the content to prevent XSS attacks
+6. WHEN SQL queries are constructed, THEN THE Ticket_System SHALL use parameterized queries to prevent SQL injection
+7. WHEN input validation fails, THEN THE Ticket_System SHALL return a clear error message without exposing system internals
+
+### Requirement 13: Session Management (NIST AC-12)
+
+**User Story:** As a security officer, I want secure session management with automatic termination, so that inactive sessions cannot be exploited by unauthorized users.
+
+**NIST Controls:**
+- **AC-12 (Session Termination)**: Automatically terminate user sessions after defined conditions or trigger events
+
+#### Acceptance Criteria
+
+1. WHEN a JWT token is issued, THEN THE Ticket_System SHALL set an appropriate expiration time (recommended: 8 hours for demo, 1 hour for production)
+2. WHEN a JWT token expires, THEN THE Ticket_System SHALL reject API requests and require re-authentication
+3. WHEN a user logs out, THEN THE Ticket_System SHALL clear all client-side authentication tokens
+4. WHEN a user closes the browser, THEN THE Ticket_System SHALL not persist authentication tokens beyond the session (no "remember me" in demo)
+5. WHEN generating JWT tokens, THEN THE Ticket_System SHALL include claims for user identity, issuance time, and expiration time
+6. WHEN validating JWT tokens, THEN THE Ticket_System SHALL verify signature, expiration, and token structure
+7. WHEN a session is terminated, THEN THE Ticket_System SHALL require full re-authentication for subsequent access
