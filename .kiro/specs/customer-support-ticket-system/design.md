@@ -947,3 +947,129 @@ The application uses several security middleware packages:
 **Overall Security Posture:**
 - **Demo Environment:** ✅ Adequate - Basic security controls in place
 - **Production Environment:** ⚠️ Requires enhancements - See recommendations above
+
+## UI Enhancements
+
+### Kanban Board View
+
+The Kanban board provides a visual workflow management interface for support agents to manage tickets through drag-and-drop interactions.
+
+#### KanbanBoard Component
+
+The main Kanban board component displays tickets organized by status columns with category grouping and priority sorting.
+
+**Features:**
+- Four status columns: Open, In Progress, Resolved, Closed
+- Tickets grouped by category within each column (Technical, Billing, General)
+- Tickets sorted by priority within each category group (Critical → High → Medium → Low)
+- Drag-and-drop to update ticket status
+- Click ticket to navigate to detail view
+- Real-time status updates with system comment creation
+
+**Component Structure:**
+```typescript
+interface KanbanBoardProps {
+  // No props - fetches tickets internally
+}
+
+// Renders four KanbanColumn components, one per status
+```
+
+#### KanbanColumn Component
+
+Represents a single status column on the Kanban board.
+
+**Features:**
+- Column header with status name and ticket count
+- Drop zone for drag-and-drop
+- Groups tickets by category
+- Renders CategoryGroup components for each category
+
+**Component Structure:**
+```typescript
+interface KanbanColumnProps {
+  status: TicketStatus;
+  tickets: Ticket[];
+  onDrop: (ticketId: string, newStatus: TicketStatus) => void;
+}
+```
+
+#### CategoryGroup Component
+
+Groups tickets by category within a status column.
+
+**Features:**
+- Category header with icon and name
+- Tickets sorted by priority (Critical → High → Medium → Low)
+- Renders KanbanCard components for each ticket
+
+**Component Structure:**
+```typescript
+interface CategoryGroupProps {
+  category: TicketCategory;
+  tickets: Ticket[];
+}
+```
+
+#### KanbanCard Component
+
+Represents a single ticket card on the Kanban board.
+
+**Features:**
+- Draggable ticket card
+- Displays ticket number, title, and customer name
+- Priority color indicator on left border
+- Click to navigate to ticket detail
+- Hover effects for interactivity
+
+**Component Structure:**
+```typescript
+interface KanbanCardProps {
+  ticket: Ticket;
+  onDragStart: (ticketId: string) => void;
+}
+```
+
+### Kanban Board Data Flow
+
+```
+User drags ticket → onDragStart captures ticket ID
+User drops in column → onDrop receives ticket ID + new status
+API call: PATCH /api/tickets/:id/status
+Backend updates status + creates system comment
+Frontend refetches tickets
+Kanban board re-renders with updated data
+```
+
+### Drag-and-Drop Implementation
+
+The Kanban board uses HTML5 Drag and Drop API (no external library required):
+
+1. **Draggable Cards**: Each KanbanCard has `draggable={true}` attribute
+2. **Drag Events**: 
+   - `onDragStart`: Stores ticket ID in dataTransfer
+   - `onDragOver`: Prevents default to allow drop
+   - `onDrop`: Extracts ticket ID and calls update handler
+3. **Visual Feedback**: CSS classes for drag states (dragging, drag-over)
+
+### Kanban Board Correctness Properties
+
+**Property 26: Kanban column organization**
+*For any* set of tickets, when displayed on the Kanban board, tickets should be organized into columns matching their status (Open, In Progress, Resolved, Closed).
+**Validates: Requirement 14.1**
+
+**Property 27: Kanban category grouping**
+*For any* set of tickets within a status column, tickets should be grouped by category (Technical, Billing, General).
+**Validates: Requirement 14.2**
+
+**Property 28: Kanban priority sorting**
+*For any* set of tickets within a category group, tickets should be sorted by priority in descending order (Critical, High, Medium, Low).
+**Validates: Requirement 14.3**
+
+**Property 29: Kanban card completeness**
+*For any* ticket displayed on the Kanban board, the card should show the ticket number, title, and customer name.
+**Validates: Requirement 14.4**
+
+**Property 30: Kanban drag-and-drop status update**
+*For any* ticket dragged to a different status column, the system should update the ticket's status to match the target column and create a system comment recording the change.
+**Validates: Requirements 14.6, 14.7**

@@ -56,7 +56,7 @@ Use these demo credentials:
 - **Email:** `agent1@example.com`
 - **Password:** `password123`
 
-## Demo Flow (40 minutes)
+## Demo Flow (47 minutes)
 
 ### Part 1: Dashboard Overview (5 min)
 1. After login, you'll see the Dashboard
@@ -105,7 +105,25 @@ Use these demo credentials:
 3. Show it appears in the thread immediately
 4. Demonstrate validation (empty comment rejection)
 
-### Part 5: Creating New Tickets (8 min)
+### Part 5: Kanban Board (7 min)
+1. Click "Kanban" in the navigation
+2. Show the visual board layout:
+   - Four status columns: Open, In Progress, Resolved, Closed
+   - Tickets grouped by category within each column (Technical, Billing, General)
+   - Tickets sorted by priority (Critical → High → Medium → Low)
+3. Demonstrate drag-and-drop:
+   - Drag a ticket from "Open" to "In Progress"
+   - Show visual feedback during drag
+   - Ticket moves to new column
+   - System comment automatically created
+4. Show category grouping:
+   - Point out category icons (🔧 Technical, 💰 Billing, 📋 General)
+   - Show how tickets are organized within each status column
+5. Show priority sorting:
+   - Point out that Critical tickets appear first
+   - Then High, Medium, and Low priority tickets
+
+### Part 6: Creating New Tickets (8 min)
 1. Click "New Ticket" in navigation
 2. Fill out the form:
    - Title (required, max 200 chars)
@@ -120,11 +138,12 @@ Use these demo credentials:
 4. Create a valid ticket
 5. Show automatic navigation to ticket detail page
 
-### Part 6: Wrap-up (2 min)
+### Part 7: Wrap-up (2 min)
 1. Return to Dashboard
 2. Show updated metrics reflecting new ticket
 3. Highlight key features:
    - Real-time updates
+   - Kanban board with drag-and-drop
    - Clean, intuitive interface
    - Comprehensive filtering
    - Full audit trail with comments

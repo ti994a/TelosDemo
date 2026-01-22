@@ -4,7 +4,7 @@
 
 This document provides complete traceability from requirements through design, implementation, and testing. It ensures that every requirement is implemented, every design element is traceable to requirements, and every component is tested.
 
-**Last Updated:** 2024-01-20
+**Last Updated:** 2026-01-22
 
 ## How to Use This Matrix
 
@@ -178,6 +178,21 @@ This document provides complete traceability from requirements through design, i
 
 ---
 
+## Requirement 14: Kanban Board View
+
+| Acceptance Criteria | Design Property | Implementation Files | Test Files | Status |
+|---------------------|-----------------|---------------------|------------|--------|
+| 14.1: Display status columns | Property 26: Kanban column organization | `frontend/src/components/kanban/KanbanBoard.tsx`<br>`frontend/src/components/kanban/KanbanColumn.tsx` | `tests/test-kanban.sh` (Test 2: Column organization)<br>`backend/src/__tests__/kanban.properties.test.ts` (Property 26) | ✅ |
+| 14.2: Group by category | Property 27: Kanban category grouping | `frontend/src/components/kanban/KanbanColumn.tsx`<br>`frontend/src/components/kanban/CategoryGroup.tsx` | `tests/test-kanban.sh` (Test 3: Category grouping)<br>`backend/src/__tests__/kanban.properties.test.ts` (Property 27) | ✅ |
+| 14.3: Sort by priority | Property 28: Kanban priority sorting | `frontend/src/components/kanban/CategoryGroup.tsx` (sorting logic) | `tests/test-kanban.sh` (Test 4: Priority sorting)<br>`backend/src/__tests__/kanban.properties.test.ts` (Property 28) | ✅ |
+| 14.4: Display card info | Property 29: Kanban card completeness | `frontend/src/components/kanban/KanbanCard.tsx` | `tests/test-kanban.sh` (Test 5: Card display)<br>`backend/src/__tests__/kanban.properties.test.ts` (Property 29) | ✅ |
+| 14.5: Navigate to detail | N/A (UI behavior) | `frontend/src/components/kanban/KanbanCard.tsx` (onClick handler) | Manual test (click card) | ✅ |
+| 14.6: Drag-and-drop update | Property 30: Kanban drag-and-drop status update | `frontend/src/components/kanban/KanbanBoard.tsx` (drag handlers)<br>`frontend/src/components/kanban/KanbanCard.tsx` (draggable) | `tests/test-kanban.sh` (Test 6: Drag-and-drop)<br>`backend/src/__tests__/kanban.properties.test.ts` (Property 30) | ✅ |
+| 14.7: Create system comment | Property 30: Kanban drag-and-drop status update | `backend/src/services/ticketService.ts` (updateTicketStatus) | `tests/test-kanban.sh` (Test 7: System comment) | ✅ |
+| 14.8: Kanban navigation | N/A (UI behavior) | `frontend/src/App.tsx` (Kanban route) | `tests/test-kanban.sh` (Test 8: All columns exist) | ✅ |
+
+---
+
 ## Summary Statistics
 
 ### Requirements Coverage
@@ -197,22 +212,24 @@ This document provides complete traceability from requirements through design, i
 | Req 11: Audit Logging (NIST) | 6 | 6 | 0 | 0 |
 | Req 12: Input Validation (NIST) | 7 | 7 | 0 | 0 |
 | Req 13: Session Mgmt (NIST) | 7 | 6 | 1 | 0 |
-| **TOTAL** | **71** | **68** | **3** | **0** |
+| Req 14: Kanban Board | 8 | 8 | 0 | 0 |
+| **TOTAL** | **79** | **76** | **3** | **0** |
 
-**Overall Completion: 95.8%** (68/71 fully implemented, 3 partially implemented)
+**Overall Completion: 96.2%** (76/79 fully implemented, 3 partially implemented)
 
 ### Design Properties Coverage
 
-- **Total Properties Defined:** 25
-- **Properties with Tests:** 25
-- **Properties Fully Tested:** 23
+- **Total Properties Defined:** 30
+- **Properties with Tests:** 30
+- **Properties Fully Tested:** 28
 - **Properties Partially Tested:** 2 (token expiration requires manual testing)
+- **Properties Not Tested:** 0
 
 ### Test Coverage
 
-- **Total Test Scripts:** 4
-- **Total Test Cases:** 24
-- **Passing Tests:** 24
+- **Total Test Scripts:** 5
+- **Total Test Cases:** 32
+- **Passing Tests:** 32
 - **Test Success Rate:** 100%
 
 ### Implementation Files

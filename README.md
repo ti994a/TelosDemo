@@ -4,7 +4,7 @@
 
 A full-stack web application for managing customer support tickets, built with React, TypeScript, Express, and SQLite. This system demonstrates security best practices aligned with NIST SP 800-53 standards for organizations serving government and regulated industries.
 
-[![Tests](https://img.shields.io/badge/tests-24%2F24%20passing-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-32%2F32%20passing-brightgreen)]()
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)]()
 [![React](https://img.shields.io/badge/React-18-blue)]()
 [![Express](https://img.shields.io/badge/Express-4.18-green)]()
@@ -21,6 +21,7 @@ Telos Corporation (NASDAQ: TLS) is a leading provider of information technology 
 
 - **Ticket Management**: Complete lifecycle from creation to resolution
 - **Real-time Updates**: Instant status changes with audit trail
+- **Kanban Board**: Visual board with drag-and-drop status updates
 - **Visual Analytics**: Dashboard with doughnut charts for data visualization
 - **Flexible Views**: Toggle between grid and list views for tickets
 - **Advanced Filtering**: Filter by status, priority, category, and date range
@@ -47,6 +48,13 @@ See the [Security Implementation](#-security-implementation) section for detaile
 - Total open tickets and average resolution time metrics
 - Interactive doughnut charts for priority and category breakdowns
 - Color-coded segments with legends
+
+### Kanban Board
+- Visual board organized by status columns (Open, In Progress, Resolved, Closed)
+- Tickets grouped by category within each column
+- Sorted by priority (Critical → High → Medium → Low)
+- Drag-and-drop to update ticket status
+- System comments automatically created on status changes
 
 ### Ticket List with View Toggle
 - Grid view: Card-based layout for visual browsing
@@ -134,9 +142,10 @@ This runs the complete test suite:
 - ✅ Backend API integration tests (13 tests)
 - ✅ Frontend integration tests (4 tests)
 - ✅ UI enhancement tests (7 tests)
+- ✅ Kanban board integration tests (8 tests)
 - ✅ Dashboard verification tests
 
-**Current Status: 24/24 tests passing** ✓
+**Current Status: 32/32 tests passing** ✓
 
 ### Individual Test Suites
 
@@ -149,6 +158,9 @@ This runs the complete test suite:
 
 # UI enhancement tests only
 ./tests/test-ui-enhancements.sh
+
+# Kanban board tests only
+./tests/test-kanban.sh
 
 # Dashboard verification only
 ./tests/verify-dashboard.sh

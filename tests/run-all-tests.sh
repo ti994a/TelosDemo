@@ -183,6 +183,11 @@ print_section "Test Suite 4: Dashboard Verification"
 ((TOTAL_TESTS++))
 run_test_script "verify-dashboard.sh" "Dashboard Verification"
 
+# Test Suite 5: Kanban Board Tests
+print_section "Test Suite 5: Kanban Board Integration Tests"
+((TOTAL_TESTS++))
+run_test_script "test-kanban.sh" "Kanban Board Integration Tests"
+
 # Calculate duration
 END_TIME=$(date +%s)
 DURATION=$((END_TIME - START_TIME))

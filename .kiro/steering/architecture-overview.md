@@ -56,6 +56,7 @@ graph TD
     App --> Dashboard[Dashboard]
     App --> TicketList[Ticket List]
     App --> TicketDetail[Ticket Detail]
+    App --> Kanban[Kanban Board]
     
     Auth --> LoginForm[Login Form]
     
@@ -72,12 +73,17 @@ graph TD
     
     CommentThread --> CommentCard[Comment Card]
     CommentThread --> CommentForm[Comment Form]
+    
+    Kanban --> KanbanColumn[Kanban Column]
+    KanbanColumn --> CategoryGroup[Category Group]
+    CategoryGroup --> KanbanCard[Kanban Card]
 
     style App fill:#4CAF50
     style Auth fill:#2196F3
     style Dashboard fill:#FF9800
     style TicketList fill:#9C27B0
     style TicketDetail fill:#F44336
+    style Kanban fill:#00BCD4
 ```
 
 ## Data Flow

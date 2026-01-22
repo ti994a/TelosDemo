@@ -205,3 +205,18 @@ The following security requirements align with NIST SP 800-53 controls to demons
 5. WHEN generating JWT tokens, THEN THE Ticket_System SHALL include claims for user identity, issuance time, and expiration time
 6. WHEN validating JWT tokens, THEN THE Ticket_System SHALL verify signature, expiration, and token structure
 7. WHEN a session is terminated, THEN THE Ticket_System SHALL require full re-authentication for subsequent access
+
+### Requirement 14: Kanban Board View
+
+**User Story:** As a support agent, I want to view and manage tickets on a Kanban board, so that I can visualize workflow and quickly update ticket status through drag-and-drop.
+
+#### Acceptance Criteria
+
+1. WHEN a support agent accesses the Kanban board, THEN THE Ticket_System SHALL display columns for each status (Open, In Progress, Resolved, Closed)
+2. WHEN displaying tickets on the Kanban board, THEN THE Ticket_System SHALL group tickets by category (Technical, Billing, General)
+3. WHEN displaying tickets within each category group, THEN THE Ticket_System SHALL sort tickets by priority in descending order (Critical, High, Medium, Low)
+4. WHEN displaying a ticket card on the Kanban board, THEN THE Ticket_System SHALL show the ticket title, ticket number, and customer name
+5. WHEN a support agent clicks on a ticket title or number, THEN THE Ticket_System SHALL navigate to the ticket detail view
+6. WHEN a support agent drags a ticket card to a different status column, THEN THE Ticket_System SHALL update the ticket's status to match the target column
+7. WHEN a ticket status is updated via drag-and-drop, THEN THE Ticket_System SHALL create a system comment recording the status change
+8. WHEN the Kanban board is accessed, THEN THE Ticket_System SHALL provide a navigation menu item labeled "Kanban"
