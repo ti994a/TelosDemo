@@ -7,6 +7,7 @@ import { Dashboard } from './components/dashboard/Dashboard';
 import { TicketList } from './components/tickets/TicketList';
 import { TicketDetail } from './components/tickets/TicketDetail';
 import { TicketForm } from './components/tickets/TicketForm';
+import { KanbanBoard } from './components/kanban/KanbanBoard';
 
 /**
  * Navigation component with links to main pages.
@@ -52,6 +53,16 @@ function Navigation() {
                   }`}
                 >
                   Tickets
+                </Link>
+                <Link
+                  to="/kanban"
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive('/kanban')
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  Kanban
                 </Link>
                 <Link
                   to="/tickets/new"
@@ -114,6 +125,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <TicketList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/kanban"
+          element={
+            <ProtectedRoute>
+              <KanbanBoard />
             </ProtectedRoute>
           }
         />

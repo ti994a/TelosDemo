@@ -78,6 +78,42 @@ if [ -n "$TOTAL_OPEN" ]; then
 else
     echo -e "${RED}✗ FAIL${NC} - Dashboard API failed"
 fi
+# Test 5: Check if Kanban route is accessible
+echo "Test 5: Kanban route"
+KANBAN_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:5173/kanban)
+
+if [ "$KANBAN_RESPONSE" = "200" ]; then
+    echo -e "${GREEN}✓ PASS${NC} - Kanban route is accessible"
+else
+    echo -e "${RED}✗ FAIL${NC} - Kanban route is not accessible (got HTTP $KANBAN_RESPONSE)"
+fi
+echo ""
+
+# Test 6: Test Kanban board loads tickets
+echo "Test 6: Kanban board data"
+KANBAN_TICKETS=$(curl -s http://localhost:3000/api/tickets \
+    -H "Authorization: Bearer $TOKEN")
+
+TICKET_COUNT=$(echo "$KANBAN_TICKETS" | python3 -c "import sys, json; print(len(json.load(sys.stdin)['data']))" 2>/dev/null)
+
+if [ -n "$TICKET_COUNT" ] && [ "$TICKET_COUNT" -gt 0 ]; then
+    echo -e "${GREEN}✓ PASS${NC} - Kanban board can load tickets"
+    echo "  Total Tickets: $TICKET_COUNT"
+    
+    # Check for tickets in different statuses
+    OPEN_COUNT=$(echo "$KANBAN_TICKETS" | python3 -c "import sys, json; print(len([t for t in json.load(sys.stdin)['data'] if t['status'] == 'Open']))" 2>/dev/null)
+    IN_PROGRESS_COUNT=$(echo "$KANBAN_TICKETS" | python3 -c "import sys, json; print(len([t for t in json.load(sys.stdin)['data'] if t['status'] == 'In Progress']))" 2>/dev/null)
+    RESOLVED_COUNT=$(echo "$KANBAN_TICKETS" | python3 -c "import sys, json; print(len([t for t in json.load(sys.stdin)['data'] if t['status'] == 'Resolved']))" 2>/dev/null)
+    CLOSED_COUNT=$(echo "$KANBAN_TICKETS" | python3 -c "import sys, json; print(len([t for t in json.load(sys.stdin)['data'] if t['status'] == 'Closed']))" 2>/dev/null)
+    
+    echo "  Open: $OPEN_COUNT | In Progress: $IN_PROGRESS_COUNT | Resolved: $RESOLVED_COUNT | Closed: $CLOSED_COUNT"
+    
+    if [ "$OPEN_COUNT" -gt 0 ] || [ "$IN_PROGRESS_COUNT" -gt 0 ] || [ "$RESOLVED_COUNT" -gt 0 ] || [ "$CLOSED_COUNT" -gt 0 ]; then
+        echo -e "${GREEN}✓ PASS${NC} - Tickets exist in various statuses for Kanban display"
+    fi
+else
+    echo -e "${RED}✗ FAIL${NC} - Kanban board cannot load tickets"
+fi
 echo ""
 
 echo "=========================================="
@@ -89,9 +125,17 @@ echo "2. Login with:"
 echo "   Email: agent1@example.com"
 echo "   Password: password123"
 echo "3. You should be redirected to dashboard with metrics"
+echo "4. Navigate to Kanban Board from the menu"
+echo "5. Verify tickets are displayed in 4 columns (Open, In Progress, Resolved, Closed)"
+echo "6. Try dragging a ticket to a different column"
 echo ""
 echo "Expected Dashboard Data:"
 echo "  - Total Open Tickets: $TOTAL_OPEN"
 echo "  - Priority breakdown (Critical, High, Medium, Low)"
 echo "  - Category breakdown (Technical, Billing, General)"
+echo ""
+echo "Expected Kanban Board:"
+echo "  - Total Tickets: $TICKET_COUNT"
+echo "  - Tickets grouped by category within each status column"
+echo "  - Tickets sorted by priority (Critical → High → Medium → Low)"
 echo ""

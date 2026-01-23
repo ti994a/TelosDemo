@@ -21,6 +21,7 @@ Telos Corporation (NASDAQ: TLS) is a leading provider of information technology 
 
 - **Ticket Management**: Complete lifecycle from creation to resolution
 - **Real-time Updates**: Instant status changes with audit trail
+- **Kanban Board View**: Visual workflow management with drag-and-drop status updates
 - **Visual Analytics**: Dashboard with doughnut charts for data visualization
 - **Flexible Views**: Toggle between grid and list views for tickets
 - **Advanced Filtering**: Filter by status, priority, category, and date range
@@ -47,6 +48,12 @@ See the [Security Implementation](#-security-implementation) section for detaile
 - Total open tickets and average resolution time metrics
 - Interactive doughnut charts for priority and category breakdowns
 - Color-coded segments with legends
+
+### Kanban Board View
+- Four status columns: Open, In Progress, Resolved, Closed
+- Tickets grouped by category within each column
+- Drag-and-drop to change ticket status
+- Priority-based color coding and sorting
 
 ### Ticket List with View Toggle
 - Grid view: Card-based layout for visual browsing
@@ -356,6 +363,14 @@ GET /api/tickets?status=Open&priority=High&category=Technical&startDate=2024-01-
 - `created_at` (TEXT, NOT NULL) - ISO 8601
 
 ## 🎨 UI Features
+
+### Kanban Board
+- **Four Status Columns**: Open, In Progress, Resolved, Closed
+- **Category Grouping**: Tickets organized by Technical, Billing, General within each column
+- **Priority Sorting**: Tickets sorted by priority (Critical → High → Medium → Low) within categories
+- **Drag-and-Drop**: Intuitive status updates by dragging tickets between columns
+- **Visual Feedback**: Color-coded priority borders and drag-over highlighting
+- **Click Navigation**: Click ticket number or title to view details
 
 ### Dashboard Charts
 - **Doughnut Charts**: Visual representation using HTML5 Canvas

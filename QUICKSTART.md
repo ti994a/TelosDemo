@@ -56,7 +56,7 @@ Use these demo credentials:
 - **Email:** `agent1@example.com`
 - **Password:** `password123`
 
-## Demo Flow (40 minutes)
+## Demo Flow (50 minutes)
 
 ### Part 1: Dashboard Overview (5 min)
 1. After login, you'll see the Dashboard
@@ -69,7 +69,52 @@ Use these demo credentials:
    - Point out the total count in the center of each chart
    - Highlight the interactive legend showing counts
 
-### Part 2: Ticket List & Filtering (10 min)
+### Part 2: Kanban Board View (7 min)
+1. Click "Kanban Board" in the navigation menu
+2. Show the four status columns:
+   - Open
+   - In Progress
+   - Resolved
+   - Closed
+3. Explain the organization:
+   - Tickets grouped by category (Technical, Billing, General) within each column
+   - Within each category, sorted by priority (Critical → High → Medium → Low)
+   - Color-coded borders indicate priority level
+4. Demonstrate drag-and-drop:
+   - Drag a ticket from "Open" to "In Progress"
+   - Show the visual feedback during drag (opacity change, border highlighting)
+   - Explain that the status updates automatically on the backend
+   - Point out the system comment that will be created
+5. Click on a ticket number or title to navigate to detail view
+6. Return to Kanban board to show the updated layout
+
+### Part 2.5: Kanban Board Filtering (5 min)
+1. Show the filter dropdowns above the Kanban board:
+   - Priority filter dropdown on the left
+   - Customer filter dropdown on the right
+2. Demonstrate priority filtering:
+   - Select "Critical" from priority dropdown
+   - Show that only Critical priority tickets are displayed across all columns
+   - Point out that category grouping and priority sorting are maintained
+   - Select "High" to show different results
+3. Demonstrate customer filtering:
+   - Select "All" in priority filter to reset
+   - Select a specific customer email from customer dropdown
+   - Show that only tickets from that customer are displayed
+   - Explain that the dropdown is populated with unique customer emails from all tickets
+4. Demonstrate combined filtering:
+   - Select "High" priority AND a specific customer
+   - Show that both filters work together (AND logic)
+   - Explain: "Show me all High priority tickets from this customer"
+5. Demonstrate filter reset:
+   - Select "All" in both dropdowns
+   - Show that all tickets are displayed again
+6. Show empty state handling:
+   - Select a filter combination that has no matches
+   - Point out the empty column styling
+   - Explain that the board structure is maintained even when empty
+
+### Part 3: Ticket List & Filtering (10 min)
 1. Click "Tickets" in the navigation
 2. **NEW:** Demonstrate view toggle:
    - Show default grid view (cards)
@@ -85,7 +130,7 @@ Use these demo credentials:
 5. Show "Clear Filters" functionality
 6. **NEW:** Show that filters work in both grid and list views
 
-### Part 3: Ticket Details (10 min)
+### Part 4: Ticket Details (8 min)
 1. Click on any ticket to view details
 2. Show ticket information:
    - Title and description
@@ -99,13 +144,13 @@ Use these demo credentials:
    - Existing comments with timestamps
    - System comments (status changes) in gray
 
-### Part 4: Adding Comments (5 min)
+### Part 5: Adding Comments (5 min)
 1. Scroll to comment form at bottom
 2. Add a new comment
 3. Show it appears in the thread immediately
 4. Demonstrate validation (empty comment rejection)
 
-### Part 5: Creating New Tickets (8 min)
+### Part 6: Creating New Tickets (8 min)
 1. Click "New Ticket" in navigation
 2. Fill out the form:
    - Title (required, max 200 chars)
@@ -120,12 +165,13 @@ Use these demo credentials:
 4. Create a valid ticket
 5. Show automatic navigation to ticket detail page
 
-### Part 6: Wrap-up (2 min)
+### Part 7: Wrap-up (2 min)
 1. Return to Dashboard
 2. Show updated metrics reflecting new ticket
 3. Highlight key features:
    - Real-time updates
    - Clean, intuitive interface
+   - Kanban board for visual workflow management
    - Comprehensive filtering
    - Full audit trail with comments
 
@@ -179,8 +225,10 @@ Then refresh the browser and login again.
 8. **Form Validation**: Client-side validation with helpful error messages
 9. **Authentication**: Secure JWT-based authentication
 10. **Responsive Design**: Works on desktop and mobile devices
-11. **NEW: Visual Data Representation**: Doughnut charts for priority and category breakdowns
-12. **NEW: Flexible Views**: Toggle between grid and list views for tickets
+11. **Visual Data Representation**: Doughnut charts for priority and category breakdowns
+12. **Flexible Views**: Toggle between grid and list views for tickets
+13. **Kanban Board**: Drag-and-drop workflow management with visual organization
+14. **Kanban Filtering**: Filter Kanban board by priority and customer with combined filtering support
 
 ## Next Steps After Demo
 

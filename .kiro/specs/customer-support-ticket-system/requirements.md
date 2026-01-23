@@ -129,15 +129,29 @@ The following security requirements align with NIST SP 800-53 controls to demons
 - **AC-2 (Account Management)**: Manage system accounts including creation, enabling, modification, review, and removal
 - **AC-3 (Access Enforcement)**: Enforce approved authorizations for logical access to information and system resources
 
+**Demo Implementation Status:** ✅ IMPLEMENTED (with production enhancements deferred)
+
 #### Acceptance Criteria
 
-1. WHEN a user attempts to access protected resources without authentication, THEN THE Ticket_System SHALL deny access and redirect to the login page
-2. WHEN a support agent provides valid credentials, THEN THE Ticket_System SHALL issue a time-limited JWT token with appropriate claims
-3. WHEN a JWT token expires, THEN THE Ticket_System SHALL require re-authentication before allowing further access
-4. WHEN a user provides invalid credentials, THEN THE Ticket_System SHALL reject the authentication attempt and log the failure
-5. WHEN storing user passwords, THEN THE Ticket_System SHALL use bcrypt hashing with appropriate work factor (minimum 10 rounds)
-6. WHEN a support agent logs out, THEN THE Ticket_System SHALL invalidate the session and clear authentication tokens
-7. WHEN an API request includes an invalid or expired JWT token, THEN THE Ticket_System SHALL return HTTP 401 Unauthorized
+1. ✅ **IMPLEMENTED** - WHEN a user attempts to access protected resources without authentication, THEN THE Ticket_System SHALL deny access and redirect to the login page
+2. ✅ **IMPLEMENTED** - WHEN a support agent provides valid credentials, THEN THE Ticket_System SHALL issue a time-limited JWT token with appropriate claims
+3. ✅ **IMPLEMENTED** - WHEN a JWT token expires, THEN THE Ticket_System SHALL require re-authentication before allowing further access
+4. ⚠️ **PARTIALLY IMPLEMENTED** - WHEN a user provides invalid credentials, THEN THE Ticket_System SHALL reject the authentication attempt and log the failure
+   - **Demo:** Authentication rejection implemented; logging deferred to Requirement 11
+   - **Production:** Implement comprehensive authentication failure logging with IP address, timestamp, and rate limiting
+5. ✅ **IMPLEMENTED** - WHEN storing user passwords, THEN THE Ticket_System SHALL use bcrypt hashing with appropriate work factor (minimum 10 rounds)
+6. ⚠️ **PARTIALLY IMPLEMENTED** - WHEN a support agent logs out, THEN THE Ticket_System SHALL invalidate the session and clear authentication tokens
+   - **Demo:** Client-side token clearing implemented
+   - **Production:** Implement server-side token revocation/blacklist mechanism
+7. ✅ **IMPLEMENTED** - WHEN an API request includes an invalid or expired JWT token, THEN THE Ticket_System SHALL return HTTP 401 Unauthorized
+
+**Production Enhancements Required:**
+- Implement JWT secret key rotation mechanism
+- Add token revocation/blacklist for logout
+- Implement rate limiting for authentication attempts
+- Add multi-factor authentication (MFA) support
+- Implement role-based access control (RBAC) beyond basic authentication
+- Add account lockout after failed login attempts
 
 ### Requirement 10: Data Encryption (NIST SC-12, SC-13)
 
@@ -147,13 +161,31 @@ The following security requirements align with NIST SP 800-53 controls to demons
 - **SC-12 (Cryptographic Key Establishment and Management)**: Establish and manage cryptographic keys for required cryptography
 - **SC-13 (Cryptographic Protection)**: Implement cryptographic mechanisms to protect information confidentiality and integrity
 
+**Demo Implementation Status:** ⚠️ PARTIALLY IMPLEMENTED (critical production requirements deferred)
+
 #### Acceptance Criteria
 
-1. WHEN data is transmitted between client and server, THEN THE Ticket_System SHALL use HTTPS/TLS encryption (TLS 1.2 or higher)
-2. WHEN storing user passwords, THEN THE Ticket_System SHALL use bcrypt with salt to prevent rainbow table attacks
-3. WHEN generating JWT tokens, THEN THE Ticket_System SHALL use a strong secret key (minimum 256 bits) stored securely
-4. WHEN storing sensitive configuration data, THEN THE Ticket_System SHALL use environment variables rather than hardcoded values
-5. WHEN displaying sensitive information in logs, THEN THE Ticket_System SHALL mask or redact passwords, tokens, and PII
+1. ❌ **DEFERRED TO PRODUCTION** - WHEN data is transmitted between client and server, THEN THE Ticket_System SHALL use HTTPS/TLS encryption (TLS 1.2 or higher)
+   - **Demo:** Uses HTTP for local development
+   - **Production:** MUST implement HTTPS/TLS with valid certificates before deployment
+   - **Security Risk:** All data including passwords and JWT tokens transmitted in clear text in demo
+2. ✅ **IMPLEMENTED** - WHEN storing user passwords, THEN THE Ticket_System SHALL use bcrypt with salt to prevent rainbow table attacks
+3. ⚠️ **PARTIALLY IMPLEMENTED** - WHEN generating JWT tokens, THEN THE Ticket_System SHALL use a strong secret key (minimum 256 bits) stored securely
+   - **Demo:** Uses environment variable with weak fallback (`'your-secret-key-change-in-production'`)
+   - **Production:** MUST use cryptographically secure secret (minimum 256 bits) with no fallback
+4. ✅ **IMPLEMENTED** - WHEN storing sensitive configuration data, THEN THE Ticket_System SHALL use environment variables rather than hardcoded values
+5. ⚠️ **PARTIALLY IMPLEMENTED** - WHEN displaying sensitive information in logs, THEN THE Ticket_System SHALL mask or redact passwords, tokens, and PII
+   - **Demo:** Basic console.log used; no sensitive data masking
+   - **Production:** Implement structured logging with automatic PII redaction
+
+**Production Requirements (CRITICAL):**
+- ❗ **MANDATORY:** Implement HTTPS/TLS (TLS 1.2 or higher) with valid certificates
+- ❗ **MANDATORY:** Generate and securely store strong JWT secret (minimum 256 bits)
+- Implement database encryption at rest for sensitive fields
+- Add encryption for backup files
+- Implement secure key management system (e.g., AWS KMS, HashiCorp Vault)
+- Add certificate rotation and monitoring
+- Implement HTTP Strict Transport Security (HSTS) headers
 
 ### Requirement 11: Audit Logging (NIST AU-2, AU-3)
 
@@ -163,14 +195,38 @@ The following security requirements align with NIST SP 800-53 controls to demons
 - **AU-2 (Event Logging)**: Identify the types of events that the system is capable of logging
 - **AU-3 (Content of Audit Records)**: Ensure audit records contain information that establishes what events occurred, when, where, the source, and the outcome
 
+**Demo Implementation Status:** ❌ DEFERRED TO PRODUCTION (minimal logging only)
+
 #### Acceptance Criteria
 
-1. WHEN a user attempts authentication, THEN THE Ticket_System SHALL log the attempt with timestamp, username, source IP, and outcome (success/failure)
-2. WHEN a support agent modifies a ticket, THEN THE Ticket_System SHALL create an audit record with agent identifier, timestamp, and changes made
-3. WHEN a ticket status changes, THEN THE Ticket_System SHALL create a system comment recording the change with timestamp and agent identifier
-4. WHEN security-relevant events occur (failed authentication, authorization failures), THEN THE Ticket_System SHALL log the event with sufficient detail for investigation
-5. WHEN audit logs are created, THEN THE Ticket_System SHALL include: timestamp, event type, user identifier, source IP (if applicable), and outcome
-6. WHEN displaying audit information, THEN THE Ticket_System SHALL protect sensitive data from unauthorized disclosure
+1. ❌ **DEFERRED TO PRODUCTION** - WHEN a user attempts authentication, THEN THE Ticket_System SHALL log the attempt with timestamp, username, source IP, and outcome (success/failure)
+   - **Demo:** No authentication logging implemented
+   - **Production:** Implement comprehensive authentication audit trail
+2. ⚠️ **PARTIALLY IMPLEMENTED** - WHEN a support agent modifies a ticket, THEN THE Ticket_System SHALL create an audit record with agent identifier, timestamp, and changes made
+   - **Demo:** System comments created for status changes only
+   - **Production:** Implement full audit trail for all ticket modifications (title, description, priority, category, etc.)
+3. ✅ **IMPLEMENTED** - WHEN a ticket status changes, THEN THE Ticket_System SHALL create a system comment recording the change with timestamp and agent identifier
+4. ❌ **DEFERRED TO PRODUCTION** - WHEN security-relevant events occur (failed authentication, authorization failures), THEN THE Ticket_System SHALL log the event with sufficient detail for investigation
+   - **Demo:** Basic console.error used; no structured security logging
+   - **Production:** Implement security event logging with SIEM integration capability
+5. ❌ **DEFERRED TO PRODUCTION** - WHEN audit logs are created, THEN THE Ticket_System SHALL include: timestamp, event type, user identifier, source IP (if applicable), and outcome
+   - **Demo:** No structured audit logging
+   - **Production:** Implement comprehensive audit log format meeting NIST AU-3 requirements
+6. ❌ **DEFERRED TO PRODUCTION** - WHEN displaying audit information, THEN THE Ticket_System SHALL protect sensitive data from unauthorized disclosure
+   - **Demo:** No audit log viewing capability
+   - **Production:** Implement secure audit log access with role-based permissions
+
+**Production Requirements (CRITICAL for Government/DoD Compliance):**
+- ❗ **MANDATORY:** Implement structured audit logging system (e.g., Winston, Bunyan, or ELK stack)
+- ❗ **MANDATORY:** Log all authentication attempts with IP address, timestamp, and outcome
+- Implement tamper-evident audit log storage
+- Add audit log retention policy (minimum 90 days for compliance)
+- Implement audit log monitoring and alerting
+- Add audit log export capability for compliance reporting
+- Implement log integrity verification (checksums/signatures)
+- Add SIEM integration capability
+- Implement separate audit log database/storage
+- Add audit log review and analysis tools
 
 ### Requirement 12: Input Validation (NIST SI-10)
 
@@ -179,15 +235,29 @@ The following security requirements align with NIST SP 800-53 controls to demons
 **NIST Controls:**
 - **SI-10 (Information Input Validation)**: Check the validity of information inputs to the system
 
+**Demo Implementation Status:** ✅ IMPLEMENTED (with production enhancements recommended)
+
 #### Acceptance Criteria
 
-1. WHEN a user submits a ticket, THEN THE Ticket_System SHALL validate that title and description contain only allowed characters and are within length limits
-2. WHEN a user provides email input, THEN THE Ticket_System SHALL validate the email format before processing
-3. WHEN a user selects enumerated values (status, priority, category), THEN THE Ticket_System SHALL verify the value is in the allowed set
-4. WHEN processing API requests, THEN THE Ticket_System SHALL validate request body structure and data types before processing
-5. WHEN user input is displayed in the UI, THEN THE Ticket_System SHALL sanitize the content to prevent XSS attacks
-6. WHEN SQL queries are constructed, THEN THE Ticket_System SHALL use parameterized queries to prevent SQL injection
-7. WHEN input validation fails, THEN THE Ticket_System SHALL return a clear error message without exposing system internals
+1. ✅ **IMPLEMENTED** - WHEN a user submits a ticket, THEN THE Ticket_System SHALL validate that title and description contain only allowed characters and are within length limits
+   - **Note:** Basic validation implemented; production should add explicit length limits and character whitelisting
+2. ✅ **IMPLEMENTED** - WHEN a user provides email input, THEN THE Ticket_System SHALL validate the email format before processing
+3. ✅ **IMPLEMENTED** - WHEN a user selects enumerated values (status, priority, category), THEN THE Ticket_System SHALL verify the value is in the allowed set
+4. ✅ **IMPLEMENTED** - WHEN processing API requests, THEN THE Ticket_System SHALL validate request body structure and data types before processing
+5. ⚠️ **PARTIALLY IMPLEMENTED** - WHEN user input is displayed in the UI, THEN THE Ticket_System SHALL sanitize the content to prevent XSS attacks
+   - **Demo:** React's default XSS protection via JSX; no explicit sanitization library
+   - **Production:** Add DOMPurify or similar library for explicit HTML sanitization if rich text is added
+6. ✅ **IMPLEMENTED** - WHEN SQL queries are constructed, THEN THE Ticket_System SHALL use parameterized queries to prevent SQL injection
+7. ✅ **IMPLEMENTED** - WHEN input validation fails, THEN THE Ticket_System SHALL return a clear error message without exposing system internals
+
+**Production Enhancements Recommended:**
+- Add explicit maximum length limits for all text fields (title: 200 chars, description: 5000 chars)
+- Implement rate limiting on API endpoints to prevent abuse
+- Add CAPTCHA for public ticket submission form
+- Implement Content Security Policy (CSP) headers
+- Add input sanitization library (DOMPurify) if rich text editing is added
+- Implement file upload validation if attachments are added
+- Add request size limits to prevent DoS attacks
 
 ### Requirement 13: Session Management (NIST AC-12)
 
@@ -196,12 +266,123 @@ The following security requirements align with NIST SP 800-53 controls to demons
 **NIST Controls:**
 - **AC-12 (Session Termination)**: Automatically terminate user sessions after defined conditions or trigger events
 
+**Demo Implementation Status:** ⚠️ PARTIALLY IMPLEMENTED (production enhancements required)
+
 #### Acceptance Criteria
 
-1. WHEN a JWT token is issued, THEN THE Ticket_System SHALL set an appropriate expiration time (recommended: 8 hours for demo, 1 hour for production)
-2. WHEN a JWT token expires, THEN THE Ticket_System SHALL reject API requests and require re-authentication
-3. WHEN a user logs out, THEN THE Ticket_System SHALL clear all client-side authentication tokens
-4. WHEN a user closes the browser, THEN THE Ticket_System SHALL not persist authentication tokens beyond the session (no "remember me" in demo)
-5. WHEN generating JWT tokens, THEN THE Ticket_System SHALL include claims for user identity, issuance time, and expiration time
-6. WHEN validating JWT tokens, THEN THE Ticket_System SHALL verify signature, expiration, and token structure
-7. WHEN a session is terminated, THEN THE Ticket_System SHALL require full re-authentication for subsequent access
+1. ⚠️ **PARTIALLY IMPLEMENTED** - WHEN a JWT token is issued, THEN THE Ticket_System SHALL set an appropriate expiration time (recommended: 8 hours for demo, 1 hour for production)
+   - **Demo:** Token expiration set to 24 hours (too long for production)
+   - **Production:** Reduce to 1 hour with refresh token mechanism
+2. ✅ **IMPLEMENTED** - WHEN a JWT token expires, THEN THE Ticket_System SHALL reject API requests and require re-authentication
+3. ⚠️ **PARTIALLY IMPLEMENTED** - WHEN a user logs out, THEN THE Ticket_System SHALL clear all client-side authentication tokens
+   - **Demo:** Client-side token clearing only
+   - **Production:** Implement server-side token revocation/blacklist
+4. ✅ **IMPLEMENTED** - WHEN a user closes the browser, THEN THE Ticket_System SHALL not persist authentication tokens beyond the session (no "remember me" in demo)
+5. ✅ **IMPLEMENTED** - WHEN generating JWT tokens, THEN THE Ticket_System SHALL include claims for user identity, issuance time, and expiration time
+6. ✅ **IMPLEMENTED** - WHEN validating JWT tokens, THEN THE Ticket_System SHALL verify signature, expiration, and token structure
+7. ✅ **IMPLEMENTED** - WHEN a session is terminated, THEN THE Ticket_System SHALL require full re-authentication for subsequent access
+
+**Production Requirements:**
+- ❗ **MANDATORY:** Reduce JWT token expiration to 1 hour maximum
+- Implement refresh token mechanism for seamless re-authentication
+- Add server-side token revocation/blacklist for logout
+- Implement session timeout warning before expiration
+- Add concurrent session detection and management
+- Implement "remember me" functionality with secure long-lived tokens (if required)
+- Add session activity monitoring and anomaly detection
+- Implement automatic logout after period of inactivity (15-30 minutes recommended)
+
+### Requirement 14: Kanban Board View
+
+**User Story:** As a support agent, I want to view tickets in a Kanban board layout with drag-and-drop functionality, so that I can visualize workflow and quickly update ticket status.
+
+#### Acceptance Criteria
+
+1. WHEN a support agent accesses the Kanban board, THEN THE Ticket_System SHALL display tickets in four columns representing status (Open, In Progress, Resolved, Closed)
+2. WHEN displaying tickets in each column, THEN THE Ticket_System SHALL group tickets by category (Technical, Billing, General)
+3. WHEN displaying tickets within each category group, THEN THE Ticket_System SHALL sort tickets by priority in descending order (Critical, High, Medium, Low)
+4. WHEN displaying a ticket card, THEN THE Ticket_System SHALL show the ticket number, title, customer name, and priority badge
+5. WHEN a support agent clicks a ticket number or title, THEN THE Ticket_System SHALL navigate to the ticket detail page
+6. WHEN a support agent drags a ticket to a different status column, THEN THE Ticket_System SHALL update the ticket status in the database
+7. WHEN a ticket is dropped in a new column, THEN THE Ticket_System SHALL create a system comment recording the status change
+8. WHEN a support agent drags a ticket over a column, THEN THE Ticket_System SHALL provide visual feedback indicating the drop target
+9. WHEN a column contains no tickets, THEN THE Ticket_System SHALL display an empty column with appropriate styling
+10. WHEN tickets are grouped by category, THEN THE Ticket_System SHALL display a category badge for each group
+
+### Requirement 15: Kanban Board Filtering
+
+**User Story:** As a support agent, I want to filter tickets on the Kanban board by priority and customer, so that I can focus on specific subsets of tickets and manage my workflow more efficiently.
+
+#### Acceptance Criteria
+
+1. WHEN a support agent accesses the Kanban board, THEN THE Ticket_System SHALL display a priority filter dropdown above the board columns
+2. WHEN a support agent accesses the Kanban board, THEN THE Ticket_System SHALL display a customer filter dropdown above the board columns
+3. WHEN the priority filter dropdown is opened, THEN THE Ticket_System SHALL display options for "All", "Critical", "High", "Medium", and "Low"
+4. WHEN the customer filter dropdown is opened, THEN THE Ticket_System SHALL display "All" and a list of unique customer emails from all tickets
+5. WHEN a support agent selects a priority filter value, THEN THE Ticket_System SHALL display only tickets matching the selected priority across all status columns
+6. WHEN a support agent selects a customer filter value, THEN THE Ticket_System SHALL display only tickets from the selected customer across all status columns
+7. WHEN both priority and customer filters are applied, THEN THE Ticket_System SHALL display only tickets matching both filter criteria
+8. WHEN a support agent selects "All" for a filter, THEN THE Ticket_System SHALL remove that filter and display all tickets (subject to other active filters)
+9. WHEN filters are applied and no tickets match the criteria in a column, THEN THE Ticket_System SHALL display an empty column with appropriate styling
+10. WHEN filters are applied, THEN THE Ticket_System SHALL maintain the existing category grouping and priority sorting within filtered results
+
+---
+
+## Security Requirements Summary
+
+### Demo vs. Production Implementation Status
+
+This demo application implements core security functionality to demonstrate best practices, but **MUST NOT be deployed to production without implementing the deferred security requirements** listed above.
+
+#### ✅ Implemented in Demo
+- JWT-based authentication with token expiration
+- Password hashing with bcrypt (10 rounds)
+- Protected API endpoints with authentication middleware
+- Input validation and parameterized SQL queries
+- Basic error handling without exposing internals
+- Client-side token management
+
+#### ❌ Critical Requirements Deferred to Production
+
+**MANDATORY before production deployment:**
+
+1. **HTTPS/TLS Encryption (Requirement 10.1)**
+   - ❗ **CRITICAL:** All HTTP traffic currently unencrypted
+   - Must implement TLS 1.2 or higher with valid certificates
+   - All passwords and tokens currently transmitted in clear text
+
+2. **Comprehensive Audit Logging (Requirement 11)**
+   - ❗ **CRITICAL:** No structured security event logging
+   - Must implement authentication attempt logging
+   - Must implement full audit trail for compliance
+
+3. **Strong Cryptographic Keys (Requirement 10.3)**
+   - ❗ **CRITICAL:** Weak JWT secret fallback in code
+   - Must use cryptographically secure 256-bit secret
+   - Must implement secure key management
+
+#### ⚠️ Production Enhancements Required
+
+- Server-side token revocation mechanism
+- Rate limiting and account lockout
+- Multi-factor authentication (MFA)
+- Role-based access control (RBAC)
+- Session timeout and refresh tokens
+- Security monitoring and alerting
+- SIEM integration capability
+- Audit log retention and analysis tools
+
+#### 📋 Compliance Notes
+
+**For Government/DoD Deployment (Telos Corporation):**
+- Current demo does NOT meet NIST SP 800-53 requirements for production
+- HTTPS/TLS is MANDATORY for FISMA compliance
+- Comprehensive audit logging is MANDATORY for compliance
+- All deferred requirements must be implemented before production deployment
+- Security assessment and authorization (SA&A) required before deployment
+
+**Recommended Timeline:**
+- Phase 1 (Immediate): Implement HTTPS/TLS and strong JWT secrets
+- Phase 2 (Pre-Production): Implement comprehensive audit logging
+- Phase 3 (Production): Implement all remaining security enhancements
+- Phase 4 (Ongoing): Security monitoring, updates, and compliance maintenance

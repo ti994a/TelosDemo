@@ -4,7 +4,7 @@
 
 This document provides complete traceability from requirements through design, implementation, and testing. It ensures that every requirement is implemented, every design element is traceable to requirements, and every component is tested.
 
-**Last Updated:** 2024-01-20
+**Last Updated:** 2025-01-23
 
 ## How to Use This Matrix
 
@@ -113,68 +113,141 @@ This document provides complete traceability from requirements through design, i
 
 ## Requirement 9: Authentication and Authorization (NIST AC-2, AC-3)
 
+**Demo Status:** ✅ IMPLEMENTED (with production enhancements deferred)
+
 | Acceptance Criteria | Design Property | Implementation Files | Test Files | Status |
 |---------------------|-----------------|---------------------|------------|--------|
 | 9.1: Deny access without auth | Property 22: Protected resource authorization | `backend/src/middleware/auth.ts` (authenticate)<br>`frontend/src/App.tsx` (ProtectedRoute) | `tests/test-api.sh` (Test 10: 401 Unauthorized) | ✅ |
-| 9.2: Issue JWT token | Property 20: Valid authentication | `backend/src/services/authService.ts` (generateToken)<br>`backend/src/utils/jwt.ts` | `tests/test-api.sh` (Test 8: Token in response) | ✅ |
-| 9.3: Require re-auth on expiration | Property 22: Protected resource authorization | `backend/src/middleware/auth.ts` (token expiration check) | Manual test (wait 8 hours) | ⚠️ |
-| 9.4: Reject invalid credentials | Property 21: Invalid authentication rejection | `backend/src/services/authService.ts` (bcrypt.compare) | `tests/test-api.sh` (Test 9: 401 Unauthorized) | ✅ |
-| 9.5: Hash passwords with bcrypt | N/A (Implementation detail) | `backend/src/services/authService.ts` (bcrypt.hash) | Code review | ✅ |
-| 9.6: Invalidate session on logout | Property 23: Logout token invalidation | `frontend/src/context/AuthContext.tsx` (localStorage.clear) | `tests/test-api.sh` (Test 11: Logout) | ✅ |
-| 9.7: Return 401 for invalid token | Property 22: Protected resource authorization | `backend/src/middleware/auth.ts` (jwt.verify error) | `tests/test-api.sh` (Test 10: Invalid token) | ✅ |
+| 9.2: Issue JWT token | Property 20: Valid authentication | `backend/src/services/authService.ts` (login)<br>`backend/src/services/authService.ts` (jwt.sign) | `tests/test-api.sh` (Test 8: Token in response) | ✅ |
+| 9.3: Require re-auth on expiration | Property 22: Protected resource authorization | `backend/src/middleware/auth.ts` (verifyToken) | Manual test (wait 24 hours) | ✅ |
+| 9.4: Reject and log invalid credentials | Property 21: Invalid authentication rejection | `backend/src/services/authService.ts` (bcrypt.compare) | `tests/test-api.sh` (Test 9: 401 Unauthorized) | ⚠️ |
+| 9.5: Hash passwords with bcrypt (10 rounds) | N/A (Implementation detail) | `backend/src/services/authService.ts` (bcrypt.hash, SALT_ROUNDS=10) | Code review | ✅ |
+| 9.6: Invalidate session on logout | Property 23: Logout token invalidation | `frontend/src/context/AuthContext.tsx` (clearAuthToken) | `tests/test-api.sh` (Test 11: Logout) | ⚠️ |
+| 9.7: Return 401 for invalid token | Property 22: Protected resource authorization | `backend/src/middleware/auth.ts` (jwt.verify error handling) | `tests/test-api.sh` (Test 10: Invalid token) | ✅ |
+
+**Notes:**
+- ⚠️ 9.4: Authentication rejection works; comprehensive logging deferred to Requirement 11
+- ⚠️ 9.6: Client-side token clearing implemented; server-side revocation deferred to production
+- **Production Deferred:** Token revocation/blacklist, rate limiting, account lockout, MFA, RBAC
 
 ---
 
 ## Requirement 10: Data Encryption (NIST SC-12, SC-13)
 
+**Demo Status:** ⚠️ PARTIALLY IMPLEMENTED (critical production requirements deferred)
+
 | Acceptance Criteria | Design Property | Implementation Files | Test Files | Status |
 |---------------------|-----------------|---------------------|------------|--------|
-| 10.1: Use HTTPS/TLS | N/A (Deployment config) | Deployment configuration (reverse proxy) | Manual verification | ⚠️ |
-| 10.2: Hash passwords with bcrypt | N/A (Implementation detail) | `backend/src/services/authService.ts` (bcrypt.hash with salt) | Code review | ✅ |
-| 10.3: Use strong JWT secret | N/A (Configuration) | `backend/.env` (JWT_SECRET) | Configuration review | ✅ |
-| 10.4: Use environment variables | N/A (Configuration) | `backend/.env.example`<br>`backend/src/utils/jwt.ts` | Code review | ✅ |
-| 10.5: Mask sensitive data in logs | N/A (Implementation detail) | `backend/src/app.ts` (morgan config) | Log review | ✅ |
+| 10.1: Use HTTPS/TLS (TLS 1.2+) | N/A (Deployment config) | ❌ **DEFERRED TO PRODUCTION** | N/A | ❌ |
+| 10.2: Hash passwords with bcrypt + salt | N/A (Implementation detail) | `backend/src/services/authService.ts` (bcrypt.hash with auto-salt) | Code review | ✅ |
+| 10.3: Use strong JWT secret (256 bits) | N/A (Configuration) | `backend/src/services/authService.ts` (JWT_SECRET env var) | Configuration review | ⚠️ |
+| 10.4: Use environment variables | N/A (Configuration) | `backend/.env.example`<br>`backend/src/services/authService.ts` | Code review | ✅ |
+| 10.5: Mask sensitive data in logs | N/A (Implementation detail) | ❌ **DEFERRED TO PRODUCTION** | N/A | ⚠️ |
+
+**Notes:**
+- ❌ 10.1: **CRITICAL** - HTTP only in demo; HTTPS MANDATORY for production
+- ⚠️ 10.3: Environment variable used but weak fallback exists; strong secret required for production
+- ⚠️ 10.5: Basic console.log used; structured logging with PII masking deferred to production
+- **Security Risk:** All data transmitted in clear text in demo (passwords, tokens, PII)
+- **Production Deferred:** HTTPS/TLS, strong JWT secret (no fallback), database encryption at rest, secure key management
 
 ---
 
 ## Requirement 11: Audit Logging (NIST AU-2, AU-3)
 
+**Demo Status:** ❌ DEFERRED TO PRODUCTION (minimal logging only)
+
 | Acceptance Criteria | Design Property | Implementation Files | Test Files | Status |
 |---------------------|-----------------|---------------------|------------|--------|
-| 11.1: Log authentication attempts | N/A (Logging) | `backend/src/services/authService.ts` (console.log) | Log review | ✅ |
-| 11.2: Create audit record on modification | Property 11: Status update success | `backend/src/services/ticketService.ts` (system comment) | `tests/test-api.sh` (Test 5: System comment) | ✅ |
-| 11.3: Record status changes | Property 11: Status update success | `backend/src/services/ticketService.ts` (system comment) | `tests/test-api.sh` (Test 5: System comment) | ✅ |
-| 11.4: Log security events | N/A (Logging) | `backend/src/middleware/auth.ts` (console.error)<br>`backend/src/services/authService.ts` | Log review | ✅ |
-| 11.5: Include required audit fields | N/A (Logging) | `backend/src/app.ts` (morgan middleware) | Log review | ✅ |
-| 11.6: Protect sensitive data | N/A (Implementation detail) | `backend/src/app.ts` (morgan config) | Log review | ✅ |
+| 11.1: Log authentication attempts (IP, timestamp, outcome) | N/A (Logging) | ❌ **DEFERRED TO PRODUCTION** | N/A | ❌ |
+| 11.2: Create audit record on ticket modification | Property 11: Status update success | `backend/src/services/ticketService.ts` (system comment for status only) | `tests/test-api.sh` (Test 5: System comment) | ⚠️ |
+| 11.3: Record status changes with agent ID | Property 11: Status update success | `backend/src/services/ticketService.ts` (system comment) | `tests/test-api.sh` (Test 5: System comment) | ✅ |
+| 11.4: Log security events with detail | N/A (Logging) | ❌ **DEFERRED TO PRODUCTION** | N/A | ❌ |
+| 11.5: Include required audit fields (timestamp, event, user, IP, outcome) | N/A (Logging) | ❌ **DEFERRED TO PRODUCTION** | N/A | ❌ |
+| 11.6: Protect sensitive data in audit logs | N/A (Implementation detail) | ❌ **DEFERRED TO PRODUCTION** | N/A | ❌ |
+
+**Notes:**
+- ⚠️ 11.2: System comments created for status changes only; full modification audit trail deferred
+- ❌ No structured audit logging system implemented
+- ❌ No authentication attempt logging
+- ❌ No security event logging
+- **Production Deferred:** Comprehensive audit logging system, authentication logging, security event logging, audit log retention, SIEM integration
 
 ---
 
 ## Requirement 12: Input Validation (NIST SI-10)
 
+**Demo Status:** ✅ IMPLEMENTED (with production enhancements recommended)
+
 | Acceptance Criteria | Design Property | Implementation Files | Test Files | Status |
 |---------------------|-----------------|---------------------|------------|--------|
-| 12.1: Validate title and description | Property 2, Property 3: Empty rejection | `backend/src/controllers/ticketController.ts` (validation) | `tests/test-api.sh` (Test 2: Validation) | ✅ |
-| 12.2: Validate email format | N/A (Implementation detail) | `backend/src/utils/validators.ts` (email regex) | `tests/test-api.sh` (Test 2: Email validation) | ✅ |
-| 12.3: Validate enumerated values | Property 4, Property 5, Property 12 | `backend/src/controllers/ticketController.ts` (enum validation) | `tests/test-api.sh` (Test 2: Enum validation) | ✅ |
-| 12.4: Validate request structure | N/A (Implementation detail) | `backend/src/controllers/*.ts` (req.body checks) | `tests/test-api.sh` (All tests) | ✅ |
-| 12.5: Sanitize UI content | N/A (React automatic) | React automatic escaping | Manual XSS testing | ✅ |
-| 12.6: Use parameterized queries | N/A (Implementation detail) | `backend/src/database/db.ts` (sqlite prepared statements) | Code review | ✅ |
-| 12.7: Return clear error messages | N/A (Error handling) | `backend/src/middleware/errorHandler.ts` | `tests/test-api.sh` (Error responses) | ✅ |
+| 12.1: Validate title and description (chars, length) | Property 2, Property 3: Empty rejection | `backend/src/utils/validators.ts` (validateNonEmptyString)<br>`backend/src/controllers/ticketController.ts` | `tests/test-api.sh` (Test 2: Validation) | ✅ |
+| 12.2: Validate email format | N/A (Implementation detail) | `backend/src/utils/validators.ts` (validateEmail with regex) | `tests/test-api.sh` (Test 2: Email validation) | ✅ |
+| 12.3: Validate enumerated values | Property 4, Property 5, Property 12 | `backend/src/utils/validators.ts` (validateTicketStatus, etc.) | `tests/test-api.sh` (Test 2: Enum validation) | ✅ |
+| 12.4: Validate request structure and types | N/A (Implementation detail) | `backend/src/controllers/*.ts` (TypeScript + validation) | `tests/test-api.sh` (All tests) | ✅ |
+| 12.5: Sanitize UI content (prevent XSS) | N/A (React automatic) | React JSX automatic escaping | Manual XSS testing | ⚠️ |
+| 12.6: Use parameterized queries (prevent SQL injection) | N/A (Implementation detail) | `backend/src/services/*.ts` (sqlite prepared statements) | Code review | ✅ |
+| 12.7: Return clear error messages (no internals) | N/A (Error handling) | `backend/src/middleware/errorHandler.ts` | `tests/test-api.sh` (Error responses) | ✅ |
+
+**Notes:**
+- ⚠️ 12.5: React's default XSS protection via JSX; explicit sanitization library recommended if rich text added
+- **Production Enhancements:** Explicit length limits, rate limiting, CAPTCHA, CSP headers, DOMPurify for rich text
 
 ---
 
 ## Requirement 13: Session Management (NIST AC-12)
 
+**Demo Status:** ⚠️ PARTIALLY IMPLEMENTED (production enhancements required)
+
 | Acceptance Criteria | Design Property | Implementation Files | Test Files | Status |
 |---------------------|-----------------|---------------------|------------|--------|
-| 13.1: Set token expiration | Property 20: Valid authentication | `backend/src/services/authService.ts` (JWT_EXPIRES_IN) | Code review | ✅ |
-| 13.2: Reject expired tokens | Property 22: Protected resource authorization | `backend/src/middleware/auth.ts` (jwt.verify) | Manual test (wait 8 hours) | ⚠️ |
-| 13.3: Clear tokens on logout | Property 23: Logout token invalidation | `frontend/src/context/AuthContext.tsx` (localStorage.clear) | `tests/test-api.sh` (Test 11: Logout) | ✅ |
-| 13.4: No persistent tokens | N/A (Implementation detail) | `frontend/src/context/AuthContext.tsx` (localStorage only) | Code review | ✅ |
-| 13.5: Include required JWT claims | Property 20: Valid authentication | `backend/src/services/authService.ts` (jwt.sign payload) | Code review | ✅ |
-| 13.6: Verify token structure | Property 22: Protected resource authorization | `backend/src/middleware/auth.ts` (jwt.verify) | `tests/test-api.sh` (Test 10: Invalid token) | ✅ |
-| 13.7: Require re-authentication | Property 22: Protected resource authorization | `backend/src/middleware/auth.ts` (401 response) | `tests/test-api.sh` (Test 10: 401 response) | ✅ |
+| 13.1: Set appropriate token expiration (8h demo, 1h prod) | Property 20: Valid authentication | `backend/src/services/authService.ts` (TOKEN_EXPIRATION='24h') | Code review | ⚠️ |
+| 13.2: Reject expired tokens | Property 22: Protected resource authorization | `backend/src/middleware/auth.ts` (verifyToken with jwt.verify) | Manual test (wait 24 hours) | ✅ |
+| 13.3: Clear tokens on logout | Property 23: Logout token invalidation | `frontend/src/context/AuthContext.tsx` (clearAuthToken) | `tests/test-api.sh` (Test 11: Logout) | ⚠️ |
+| 13.4: No persistent tokens (no "remember me") | N/A (Implementation detail) | `frontend/src/context/AuthContext.tsx` (localStorage, not persistent) | Code review | ✅ |
+| 13.5: Include required JWT claims (user, iat, exp) | Property 20: Valid authentication | `backend/src/services/authService.ts` (jwt.sign with payload) | Code review | ✅ |
+| 13.6: Verify token signature, expiration, structure | Property 22: Protected resource authorization | `backend/src/middleware/auth.ts` (verifyToken) | `tests/test-api.sh` (Test 10: Invalid token) | ✅ |
+| 13.7: Require full re-authentication after termination | Property 22: Protected resource authorization | `backend/src/middleware/auth.ts` (401 response) | `tests/test-api.sh` (Test 10: 401 response) | ✅ |
+
+**Notes:**
+- ⚠️ 13.1: Token expiration set to 24 hours (too long); must reduce to 1 hour for production
+- ⚠️ 13.3: Client-side token clearing only; server-side revocation deferred to production
+- **Production Deferred:** 1-hour token expiration, refresh tokens, server-side revocation, session timeout warnings, concurrent session management
+
+---
+
+## Requirement 14: Kanban Board View
+
+| Acceptance Criteria | Design Property | Implementation Files | Test Files | Status |
+|---------------------|-----------------|---------------------|------------|--------|
+| 14.1: Display four status columns | Property 26: Kanban column structure | `frontend/src/components/kanban/KanbanBoard.tsx`<br>`frontend/src/App.tsx` (route) | `tests/test-frontend.sh` (Test 5: Kanban route)<br>`tests/test-ui-enhancements.sh` (Test 12: Status columns) | ✅ |
+| 14.2: Group tickets by category | Property 27: Category grouping | `frontend/src/components/kanban/KanbanBoard.tsx` (groupAndSortTickets) | `tests/test-frontend.sh` (Test 6: Kanban data)<br>`tests/test-ui-enhancements.sh` (Test 10: Category grouping) | ✅ |
+| 14.3: Sort by priority within category | Property 28: Priority sorting | `frontend/src/components/kanban/KanbanBoard.tsx` (PRIORITY_ORDER) | `tests/test-frontend.sh` (Test 6: Kanban data)<br>`tests/test-ui-enhancements.sh` (Test 11: Priority sorting) | ✅ |
+| 14.4: Show ticket number, title, customer | Property 26: Kanban column structure | `frontend/src/components/kanban/KanbanBoard.tsx` (ticket card rendering) | `tests/test-frontend.sh` (Test 6: Kanban data)<br>`tests/test-ui-enhancements.sh` (Test 8: Component exists) | ✅ |
+| 14.5: Navigate to detail on click | N/A (UI behavior) | `frontend/src/components/kanban/KanbanBoard.tsx` (handleTicketClick) | `tests/test-ui-enhancements.sh` (Test 8: Component exists) | ✅ |
+| 14.6: Drag and drop to change status | Property 29: Drag-and-drop status update | `frontend/src/components/kanban/KanbanBoard.tsx` (drag handlers) | `tests/test-ui-enhancements.sh` (Test 9: Drag handlers) | ✅ |
+| 14.7: Update backend on drop | Property 29: Drag-and-drop status update | `frontend/src/components/kanban/KanbanBoard.tsx` (handleDrop)<br>`frontend/src/api/tickets.ts` (updateTicketStatus) | `tests/test-ui-enhancements.sh` (Test 9: Drag handlers) | ✅ |
+| 14.8: Visual feedback during drag | Property 30: Visual drag feedback | `frontend/src/components/kanban/KanbanBoard.tsx` (CSS classes) | `tests/test-ui-enhancements.sh` (Test 9: Drag handlers) | ✅ |
+| 14.9: Prevent invalid drops | Property 29: Drag-and-drop status update | `frontend/src/components/kanban/KanbanBoard.tsx` (status validation) | `tests/test-ui-enhancements.sh` (Test 9: Drag handlers) | ✅ |
+| 14.10: Color-code by priority | Property 30: Visual drag feedback | `frontend/src/components/kanban/KanbanBoard.tsx` (PriorityBadge) | `tests/test-ui-enhancements.sh` (Test 8: Component exists) | ✅ |
+
+---
+
+## Requirement 15: Kanban Board Filtering
+
+| Acceptance Criteria | Design Property | Implementation Files | Test Files | Status |
+|---------------------|-----------------|---------------------|------------|--------|
+| 15.1: Display priority filter dropdown | Property 31: Kanban priority filter accuracy | `frontend/src/components/kanban/KanbanBoard.tsx` (filter UI) | `tests/test-kanban-filtering.sh` (Test 3-6: Priority filtering) | ✅ |
+| 15.2: Display customer filter dropdown | Property 32: Kanban customer filter accuracy | `frontend/src/components/kanban/KanbanBoard.tsx` (filter UI) | `tests/test-kanban-filtering.sh` (Test 7: Customer filtering) | ✅ |
+| 15.3: Populate customer dropdown with unique emails | Property 32: Kanban customer filter accuracy | `frontend/src/components/kanban/KanbanBoard.tsx` (uniqueCustomers) | `tests/test-kanban-filtering.sh` (Test 2: Unique customers) | ✅ |
+| 15.4: Include "All" option in both dropdowns | Property 34: Kanban filter reset completeness | `frontend/src/components/kanban/KanbanBoard.tsx` (filter UI) | `tests/test-kanban-filtering.sh` (Test 11: No filter returns all) | ✅ |
+| 15.5: Filter by priority when selected | Property 31: Kanban priority filter accuracy | `frontend/src/components/kanban/KanbanBoard.tsx` (filteredTickets) | `tests/test-kanban-filtering.sh` (Test 3-6: Priority filtering)<br>`frontend/src/components/kanban/__tests__/KanbanBoard.properties.test.ts` (Property 31: 100 iterations) | ✅ |
+| 15.6: Filter by customer when selected | Property 32: Kanban customer filter accuracy | `frontend/src/components/kanban/KanbanBoard.tsx` (filteredTickets) | `tests/test-kanban-filtering.sh` (Test 7: Customer filtering)<br>`frontend/src/components/kanban/__tests__/KanbanBoard.properties.test.ts` (Property 32: 100 iterations) | ✅ |
+| 15.7: Combine filters with AND logic | Property 33: Kanban combined filter accuracy | `frontend/src/components/kanban/KanbanBoard.tsx` (filteredTickets) | `tests/test-kanban-filtering.sh` (Test 8: Combined filtering)<br>`frontend/src/components/kanban/__tests__/KanbanBoard.properties.test.ts` (Property 33: 100 iterations) | ✅ |
+| 15.8: Reset filter when "All" selected | Property 34: Kanban filter reset completeness | `frontend/src/components/kanban/KanbanBoard.tsx` (filter handlers) | `tests/test-kanban-filtering.sh` (Test 11: No filter returns all)<br>`frontend/src/components/kanban/__tests__/KanbanBoard.properties.test.ts` (Property 34: 100 iterations) | ✅ |
+| 15.9: Display empty state for no matches | N/A (UI behavior) | `frontend/src/components/kanban/KanbanBoard.tsx` (empty state) | `tests/test-kanban-filtering.sh` (Test 12: Invalid filter handling) | ✅ |
+| 15.10: Maintain grouping and sorting for filtered results | Property 35: Kanban filtered ticket organization | `frontend/src/components/kanban/KanbanBoard.tsx` (groupAndSortTickets) | `tests/test-kanban-filtering.sh` (Test 9-10: Category/status grouping)<br>`frontend/src/components/kanban/__tests__/KanbanBoard.properties.test.ts` (Property 35: 100 iterations) | ✅ |
+
 
 ---
 
@@ -194,25 +267,29 @@ This document provides complete traceability from requirements through design, i
 | Req 8: Filtering | 7 | 7 | 0 | 0 |
 | Req 9: Auth/Authz (NIST) | 7 | 6 | 1 | 0 |
 | Req 10: Encryption (NIST) | 5 | 4 | 1 | 0 |
+| Req 11: Audit Logging (NIST) | 5 | 4 | 1 | 0 |
 | Req 11: Audit Logging (NIST) | 6 | 6 | 0 | 0 |
 | Req 12: Input Validation (NIST) | 7 | 7 | 0 | 0 |
 | Req 13: Session Mgmt (NIST) | 7 | 6 | 1 | 0 |
-| **TOTAL** | **71** | **68** | **3** | **0** |
+| Req 14: Kanban Board View | 10 | 10 | 0 | 0 |
+| Req 15: Kanban Filtering | 10 | 10 | 0 | 0 |
+| **TOTAL** | **91** | **88** | **3** | **0** |
 
-**Overall Completion: 95.8%** (68/71 fully implemented, 3 partially implemented)
+**Overall Completion: 96.7%** (88/91 fully implemented, 3 partially implemented)
 
 ### Design Properties Coverage
 
-- **Total Properties Defined:** 25
-- **Properties with Tests:** 25
-- **Properties Fully Tested:** 23
+- **Total Properties Defined:** 35
+- **Properties with Tests:** 35
+- **Properties Fully Tested:** 33
 - **Properties Partially Tested:** 2 (token expiration requires manual testing)
+- **Properties Not Yet Tested:** 0
 
 ### Test Coverage
 
-- **Total Test Scripts:** 4
-- **Total Test Cases:** 24
-- **Passing Tests:** 24
+- **Total Test Scripts:** 5
+- **Total Test Cases:** 41 (13 backend API + 6 frontend + 5 Kanban + 5 UI enhancements + 12 Kanban filtering)
+- **Passing Tests:** 41
 - **Test Success Rate:** 100%
 
 ### Implementation Files

@@ -75,6 +75,13 @@ All communication between frontend and backend uses JSON over HTTP. The frontend
    - `TicketForm`: Form for customers to submit new tickets
    - Includes validation for required fields
 
+7. **Kanban Board Components**
+   - `KanbanBoard`: Main Kanban board view with drag-and-drop and filtering
+   - `KanbanFilterBar`: Filter controls for priority and customer
+   - `KanbanColumn`: Individual status column component
+   - `KanbanTicketCard`: Ticket card optimized for Kanban view
+   - `CategoryGroup`: Groups tickets by category within columns
+
 #### Shared Components
 
 - `LoadingSpinner`: Loading indicator
@@ -129,6 +136,64 @@ The ticket list supports two view modes:
    - Grid icon (squares) for card view
    - List icon (lines) for table view
    - Persists user preference during session
+
+#### Kanban Board View
+
+The Kanban board provides a visual workflow management interface:
+
+1. **KanbanBoard Component**
+   - Four-column layout representing ticket statuses (Open, In Progress, Resolved, Closed)
+   - Drag-and-drop functionality using HTML5 Drag and Drop API
+   - Real-time status updates via API
+   - Visual feedback during drag operations (column highlighting)
+   - Responsive design with minimum column height
+   - Filter controls for priority and customer
+
+2. **Ticket Organization**
+   - **Status Columns**: Tickets grouped by status in vertical columns
+   - **Category Grouping**: Within each column, tickets grouped by category (Technical, Billing, General)
+   - **Priority Sorting**: Within each category, tickets sorted by priority (Critical → High → Medium → Low)
+   - **Category Badges**: Visual indicators for each category group
+
+3. **Ticket Cards**
+   - Compact card design showing:
+     - Ticket number (first 8 characters of UUID)
+     - Title (truncated to 2 lines)
+     - Customer name (if available)
+     - Priority badge
+   - Clickable ticket number and title for navigation
+   - Draggable with cursor-move indicator
+
+4. **Drag-and-Drop Interaction**
+   - **Drag Start**: User clicks and holds on ticket card
+   - **Drag Over**: Column highlights with blue ring to indicate drop target
+   - **Drop**: Ticket status updates immediately via API
+   - **System Comment**: Automatic creation of status change comment
+   - **Error Handling**: User-friendly error messages if update fails
+
+5. **Filtering Controls**
+   - **Priority Filter Dropdown**: 
+     - Located at top of board, left side
+     - Options: "All", "Critical", "High", "Medium", "Low"
+     - Default: "All" (no filtering)
+     - Updates board immediately on selection
+   - **Customer Filter Dropdown**:
+     - Located at top of board, right side
+     - Options: "All" + list of unique customer emails from all tickets
+     - Default: "All" (no filtering)
+     - Dynamically populated from ticket data
+     - Updates board immediately on selection
+   - **Combined Filtering**:
+     - Both filters work together with AND logic
+     - Filtered tickets maintain category grouping and priority sorting
+     - Filter state persists during session (component state)
+     - Filters apply across all status columns simultaneously
+
+6. **Empty States**
+   - Empty columns display with appropriate styling
+   - Empty category groups are hidden (not displayed)
+   - Ticket count displayed in column header
+   - Empty states shown when filters result in no matching tickets
 
 ### Backend Components
 
@@ -388,6 +453,19 @@ interface DoughnutChartData {
 }
 ```
 
+### Kanban Filter State Model
+
+```typescript
+interface KanbanFilterState {
+  priority: TicketPriority | 'All';  // Selected priority filter or 'All'
+  customer: string;                   // Selected customer email or 'All'
+}
+
+// Helper type for filter options
+type PriorityFilterOption = TicketPriority | 'All';
+type CustomerFilterOption = string; // 'All' or customer email
+```
+
 ### Database Schema
 
 **tickets table:**
@@ -568,6 +646,50 @@ After analyzing all acceptance criteria, I've identified several areas where pro
 **Property 25: Filter reset completeness**
 *For any* set of tickets, when all filters are cleared, the system should return all tickets in the system.
 **Validates: Requirements 8.7**
+
+### Kanban Board Properties
+
+**Property 26: Kanban column organization**
+*For any* set of tickets, when displayed in the Kanban board, tickets should be organized into four columns by status (Open, In Progress, Resolved, Closed), with each column containing only tickets matching that status.
+**Validates: Requirements 14.1**
+
+**Property 27: Kanban category grouping**
+*For any* column in the Kanban board, tickets should be grouped by category (Technical, Billing, General), with each category group displaying a category badge.
+**Validates: Requirements 14.2, 14.10**
+
+**Property 28: Kanban priority sorting**
+*For any* category group in the Kanban board, tickets should be sorted by priority in descending order (Critical → High → Medium → Low).
+**Validates: Requirements 14.3**
+
+**Property 29: Kanban card completeness**
+*For any* ticket displayed in the Kanban board, the ticket card should show the ticket number, title, customer name (if available), and priority badge.
+**Validates: Requirements 14.4**
+
+**Property 30: Kanban drag-and-drop status update**
+*For any* ticket dragged to a different status column, the system should update the ticket's status in the database and create a system comment recording the change.
+**Validates: Requirements 14.6, 14.7**
+
+### Kanban Board Filtering Properties
+
+**Property 31: Kanban priority filter accuracy**
+*For any* set of tickets and any selected priority value (Critical, High, Medium, Low), when the priority filter is applied on the Kanban board, only tickets matching the selected priority should be displayed across all status columns.
+**Validates: Requirements 15.5**
+
+**Property 32: Kanban customer filter accuracy**
+*For any* set of tickets and any selected customer email, when the customer filter is applied on the Kanban board, only tickets from the selected customer should be displayed across all status columns.
+**Validates: Requirements 15.6**
+
+**Property 33: Kanban combined filter accuracy**
+*For any* set of tickets, when both priority and customer filters are applied on the Kanban board, only tickets matching both filter criteria should be displayed across all status columns.
+**Validates: Requirements 15.7**
+
+**Property 34: Kanban filter reset completeness**
+*For any* set of tickets, when "All" is selected for a filter on the Kanban board, that filter should be removed and all tickets (subject to other active filters) should be displayed.
+**Validates: Requirements 15.8**
+
+**Property 35: Kanban filtered ticket organization**
+*For any* set of filtered tickets on the Kanban board, the tickets should maintain category grouping and priority sorting within each status column.
+**Validates: Requirements 15.10**
 
 ## Error Handling
 

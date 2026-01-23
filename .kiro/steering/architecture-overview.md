@@ -55,6 +55,7 @@ graph TD
     App --> Auth[Authentication]
     App --> Dashboard[Dashboard]
     App --> TicketList[Ticket List]
+    App --> KanbanBoard[Kanban Board]
     App --> TicketDetail[Ticket Detail]
     
     Auth --> LoginForm[Login Form]
@@ -65,6 +66,16 @@ graph TD
     TicketList --> ViewToggle[View Toggle]
     TicketList --> TicketCard[Ticket Card - Grid View]
     TicketList --> TicketListItem[Ticket List Item - List View]
+    
+    KanbanBoard --> KanbanColumn[Kanban Column]
+    KanbanBoard --> KanbanTicketCard[Kanban Ticket Card]
+    KanbanBoard --> KanbanFilterBar[Kanban Filter Bar]
+    
+    KanbanFilterBar --> PriorityFilter[Priority Dropdown]
+    KanbanFilterBar --> CustomerFilter[Customer Dropdown]
+    
+    KanbanColumn --> CategoryGroup[Category Group]
+    CategoryGroup --> KanbanTicketCard
     
     TicketDetail --> TicketHeader[Ticket Header]
     TicketDetail --> TicketInfo[Ticket Info]
@@ -77,8 +88,48 @@ graph TD
     style Auth fill:#2196F3
     style Dashboard fill:#FF9800
     style TicketList fill:#9C27B0
+    style KanbanBoard fill:#00BCD4
     style TicketDetail fill:#F44336
 ```
+
+### Key Component Features
+
+#### Dashboard Component
+- **Metrics Display**: Total tickets, open tickets, average resolution time
+- **Doughnut Charts**: Visual breakdown by priority and category using HTML5 Canvas
+- **Interactive Legends**: Click to view individual counts
+- **Responsive Design**: Adapts to mobile and desktop screens
+
+#### Ticket List Component
+- **Dual View Modes**: Grid view (cards) and List view (table)
+- **Advanced Filtering**: Filter by status, priority, category, date range
+- **Search**: Full-text search across ticket titles and descriptions
+- **View Toggle**: Persistent user preference for view mode
+- **Responsive Grid**: Adapts card layout to screen size
+
+#### Kanban Board Component
+- **Four-Column Layout**: Open, In Progress, Resolved, Closed status columns
+- **Drag-and-Drop**: HTML5 Drag and Drop API for status updates
+- **Category Grouping**: Tickets grouped by category within each status column
+- **Priority Sorting**: Tickets sorted by priority within each category (Critical → High → Medium → Low)
+- **Visual Feedback**: Column highlighting during drag operations
+- **Optimistic Updates**: Immediate UI updates with error rollback
+- **System Comments**: Automatic status change comments created on drop
+- **Empty States**: Appropriate messaging for empty columns and categories
+- **Ticket Counts**: Display count in each column header
+- **Priority Filtering**: Dropdown to filter tickets by priority (Critical, High, Medium, Low, or All)
+- **Customer Filtering**: Dropdown to filter tickets by customer email (populated from unique customers, or All)
+- **Combined Filtering**: Both filters work together with AND logic
+- **Filter Reset**: "Clear Filters" button to reset both filters to "All"
+- **Active Filter Indicator**: Shows count of filtered tickets vs total tickets
+
+#### Ticket Detail Component
+- **Full Ticket Information**: All ticket fields with formatted display
+- **Status Management**: Update ticket status with dropdown
+- **Comment Thread**: Chronological display of all comments
+- **System Comments**: Distinguished styling for automated comments
+- **Add Comments**: Form to add new comments with validation
+- **Responsive Layout**: Adapts to mobile and desktop screens
 
 ## Data Flow
 
@@ -130,6 +181,34 @@ sequenceDiagram
     Service-->>API: Return updated ticket
     API-->>UI: 200 OK + ticket data
     UI-->>Agent: Show updated status
+```
+
+### Kanban Board Drag-and-Drop Flow
+
+```mermaid
+sequenceDiagram
+    participant Agent as Support Agent
+    participant Kanban as Kanban Board UI
+    participant API as Express API
+    participant Service as Ticket Service
+    participant DB as SQLite DB
+
+    Agent->>Kanban: Drag ticket card
+    Agent->>Kanban: Drop in new status column
+    Kanban->>Kanban: Update local state (optimistic)
+    Kanban->>API: PATCH /api/tickets/:id/status<br/>(new status)
+    API->>Service: updateTicketStatus(id, status)
+    Service->>DB: UPDATE ticket status
+    Service->>DB: INSERT system comment<br/>("Status changed to X")
+    DB-->>Service: Success
+    Service-->>API: Return updated ticket
+    API-->>Kanban: 200 OK + ticket data
+    Kanban-->>Agent: Show success (column highlight)
+    
+    Note over Kanban,API: On Error
+    API-->>Kanban: Error response
+    Kanban->>Kanban: Revert local state
+    Kanban-->>Agent: Show error message
 ```
 
 ## API Endpoints
@@ -326,6 +405,12 @@ graph TB
 - **Styling**: Tailwind CSS (utility-first CSS)
 - **HTTP Client**: Fetch API (native browser API)
 - **Routing**: React Router (client-side routing)
+  - `/login` - Authentication page
+  - `/dashboard` - Metrics and charts overview
+  - `/tickets` - Ticket list with filtering
+  - `/kanban` - Kanban board view with drag-and-drop
+  - `/tickets/new` - Create new ticket form
+  - `/tickets/:id` - Ticket detail and comments
 
 ### Backend
 - **Runtime**: Node.js with TypeScript

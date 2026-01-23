@@ -6,6 +6,63 @@ This document provides guidelines for keeping all project documentation up-to-da
 
 **Documentation is code.** When you change the system, you must update the documentation. Outdated documentation is worse than no documentation because it misleads developers and users.
 
+## Critical Rule: Architecture Documentation
+
+**WHENEVER SYSTEM CHANGES ARE MADE, UPDATE THE ARCHITECTURE APPROPRIATELY.**
+
+The architecture documentation (`.kiro/steering/architecture-overview.md`) is the single source of truth for understanding the system structure. It must be kept in sync with the actual implementation at all times.
+
+**This means:**
+- Add new components to component hierarchy diagrams immediately after implementation
+- Update data flow diagrams when adding new interactions
+- Add new routes to the routing documentation when routes are created
+- Update component feature descriptions when capabilities change
+- Add sequence diagrams for new complex workflows
+
+**Why this matters:**
+- New developers rely on architecture docs to understand the system
+- Outdated architecture diagrams cause confusion and wasted time
+- Architecture docs are referenced during design reviews and planning
+- Accurate diagrams help identify architectural issues early
+
+**When to update:** After implementing ANY of the following:
+- New React components or pages
+- New API endpoints or routes
+- New backend services or controllers
+- Changes to data flow or communication patterns
+- New authentication or authorization flows
+- Changes to database schema or data models
+- New UI features or interaction patterns
+
+## File Organization
+
+### Status and Reporting Documents
+
+**Status, reporting, and update documents should be placed in the `/updates` folder** to keep them segregated from core code and documentation.
+
+**Examples of files that belong in `/updates`:**
+- Test result summaries (e.g., `TEST-RESULTS.md`)
+- Traceability matrix snapshots (e.g., `TRACEABILITY-MATRIX-COMPLETE.md`)
+- Status reports and progress updates
+- Temporary analysis documents
+- Build reports and deployment logs
+- Performance benchmarking results
+- Security scan reports
+
+**Files that should NOT be in `/updates` (remain in root or appropriate folders):**
+- Core documentation (README.md, QUICKSTART.md)
+- Specification documents (.kiro/specs/)
+- Steering guides (.kiro/steering/)
+- Source code (backend/, frontend/)
+- Test scripts (tests/)
+- Configuration files (.env, package.json, etc.)
+
+**Rationale:** Keeping status and reporting documents separate:
+- Prevents clutter in the root directory
+- Makes it clear which documents are snapshots vs. living documentation
+- Easier to exclude from version control if needed
+- Simplifies navigation for developers looking for core documentation
+
 ## Documentation Files to Maintain
 
 ### 1. README.md (Project Overview)
@@ -105,22 +162,51 @@ This document provides guidelines for keeping all project documentation up-to-da
 
 ### 6. .kiro/steering/architecture-overview.md
 
+**⚠️ CRITICAL: This document must be updated whenever system changes are made.**
+
 **Update when:**
 - Adding new components or layers
 - Modifying system architecture
 - Changing data flow
-- Adding new API endpoints
+- Adding new API endpoints or routes
 - Modifying authentication flow
 - Changing deployment architecture
+- Adding new UI views or pages
+- Implementing new features with complex interactions
+- Changing component relationships or hierarchies
 
 **What to update:**
-- Mermaid diagrams (component hierarchy, data flow, sequence diagrams)
-- Component descriptions
-- API endpoint list
-- Technology stack summary
-- Key design principles
+- **Component Hierarchy Diagram**: Add new components with proper parent-child relationships
+- **Key Component Features**: Document capabilities of new or modified components
+- **Data Flow Diagrams**: Add sequence diagrams for new workflows (ticket creation, status updates, etc.)
+- **API Endpoint List**: Add new routes with descriptions
+- **Routing Section**: Update frontend routes in Technology Stack Summary
+- **Technology Stack Summary**: Update if dependencies or tools change
+- **Key Design Principles**: Add new principles if architectural patterns change
 
-**Example:** If you add a new service layer component, add it to the component architecture diagram and describe its purpose.
+**Example scenarios:**
+
+1. **Adding a new page/view:**
+   - Add component to hierarchy diagram
+   - Add route to routing section
+   - Document key features in component features section
+   - Add data flow diagram if complex interactions exist
+
+2. **Adding a new API endpoint:**
+   - Add to API Endpoints section
+   - Update relevant sequence diagrams
+   - Document in backend components section
+
+3. **Adding drag-and-drop or complex UI interaction:**
+   - Add sequence diagram showing the interaction flow
+   - Document in component features section
+   - Show API communication and state management
+
+**Example:** When the Kanban Board was added, the following updates were required:
+- Added KanbanBoard to component hierarchy with sub-components (KanbanColumn, KanbanTicketCard, CategoryGroup)
+- Added Kanban Board features section (drag-and-drop, category grouping, priority sorting)
+- Added Kanban drag-and-drop sequence diagram
+- Added `/kanban` route to routing documentation
 
 ### 7. .kiro/steering/typescript-best-practices.md
 
@@ -269,11 +355,18 @@ Before committing changes, verify:
 - [ ] design.md has updated models, interfaces, and properties
 - [ ] tasks.md has completed tasks marked and new tasks added
 - [ ] traceability-matrix.md has updated implementation files, tests, and status
-- [ ] architecture-overview.md has updated diagrams if architecture changed
+- [ ] **architecture-overview.md has updated diagrams and component descriptions (CRITICAL)**
 - [ ] Relevant steering documents updated with new patterns
 - [ ] Test scripts updated with new test cases
 - [ ] All code examples in documentation are correct and tested
 - [ ] All links and references are valid
+
+**Special attention for architecture-overview.md:**
+- [ ] Component hierarchy diagram includes all new components
+- [ ] Component features section documents new capabilities
+- [ ] Sequence diagrams added for new complex workflows
+- [ ] Routing section includes all new routes
+- [ ] API endpoints section is complete and accurate
 
 ## Common Documentation Mistakes to Avoid
 
